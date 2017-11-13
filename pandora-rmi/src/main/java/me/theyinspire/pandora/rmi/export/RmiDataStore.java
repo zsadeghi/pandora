@@ -30,5 +30,5 @@ public interface RmiDataStore extends Remote {
 
     Map<String, Serializable> all() throws RemoteException;
 
-    String exit();
+    String exit() throws RemoteException;
 }

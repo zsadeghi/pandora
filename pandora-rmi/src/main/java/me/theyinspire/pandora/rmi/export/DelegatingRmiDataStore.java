@@ -68,7 +68,7 @@ public class DelegatingRmiDataStore implements RmiDataStore {
     }
 
     @Override
-    public String exit() {
+    public String exit() throws RemoteException {
         server.stop();
         return "bye";
     }
