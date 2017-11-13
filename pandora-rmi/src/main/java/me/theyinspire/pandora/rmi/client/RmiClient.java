@@ -53,7 +53,11 @@ public class RmiClient implements Client {
     @Override
     public String send(String content) throws ClientException {
         if (content.trim().equals("exit")) {
-            return dataStore.exit();
+            try {
+                return dataStore.exit();
+            } catch (RemoteException e) {
+                throw new ClientException("Failed to exit the data store", e);
+            }
         }
         final DataStoreCommand<?> command = deserializer.deserializeCommand(content);
         final Object result = dispatcher.dispatch(command);
