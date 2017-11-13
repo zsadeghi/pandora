@@ -10,9 +10,7 @@ fi
 echo "Updating repositories"
 apt-get update
 echo "Installing the default JRE"
-apt-get install -y default-jre
-echo "Installing network tools"
-apt-get install -y net-tools
+apt-get install -y default-jdk
 echo "Installing Apache Maven (latest)"
 apt-get install -y maven
 echo "Building all modules"
