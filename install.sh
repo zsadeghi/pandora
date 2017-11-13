@@ -20,5 +20,5 @@ cd ..
 echo "Linking the JAR file"
 rm -rf docker/docker_client/GenericNode.jar
 rm -rf docker/docker_server/GenericNode.jar
-cd pandora-kisscli/target/GenericNode.jar docker/docker_client/GenericNode.jar
-cd pandora-kisscli/target/GenericNode.jar docker/docker_server/GenericNode.jar
+cp pandora-kisscli/target/GenericNode.jar docker/docker_client/GenericNode.jar
+cp pandora-kisscli/target/GenericNode.jar docker/docker_server/GenericNode.jar
