@@ -23,6 +23,7 @@ public class KissCliLauncher {
     }
 
     public static void main(String[] args) throws Exception {
+        args = "alls 8080 8081".split(" ");
         if (args.length == 0) {
             printUsage();
             return;
@@ -75,7 +76,7 @@ public class KissCliLauncher {
         if (protocol.equals("all")) {
             return new String[]{
                     "server",
-                    "--protocols=tcp,udp,rmi,rest",
+                    "--protocols=tcp,udp,rmi",
                     "--tcp-port=" + args[1],
                     "--udp-port=" + args[2]
             };
