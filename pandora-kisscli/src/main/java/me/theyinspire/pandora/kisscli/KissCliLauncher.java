@@ -2,7 +2,6 @@ package me.theyinspire.pandora.kisscli;
 
 import me.theyinspire.pandora.cli.Launcher;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 

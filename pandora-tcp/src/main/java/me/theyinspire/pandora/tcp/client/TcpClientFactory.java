@@ -1,9 +1,8 @@
 package me.theyinspire.pandora.tcp.client;
 
+import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.client.ClientFactory;
-import me.theyinspire.pandora.core.client.Client;
-import me.theyinspire.pandora.tcp.client.TcpClient;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

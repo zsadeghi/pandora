@@ -1,9 +1,8 @@
 package me.theyinspire.pandora.rmi.server;
 
+import me.theyinspire.pandora.core.server.Server;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.ServerFactory;
-import me.theyinspire.pandora.rmi.server.RmiServer;
-import me.theyinspire.pandora.core.server.Server;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

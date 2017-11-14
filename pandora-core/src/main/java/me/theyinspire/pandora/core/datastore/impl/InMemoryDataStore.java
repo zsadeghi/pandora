@@ -17,7 +17,7 @@ public class InMemoryDataStore implements DataStore {
     private final Map<String, Serializable> storage;
 
     public InMemoryDataStore() {
-        storage = new HashMap<String, Serializable>();
+        storage = new HashMap<>();
     }
 
     public long size() {

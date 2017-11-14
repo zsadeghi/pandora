@@ -2,7 +2,6 @@ package me.theyinspire.pandora.core.datastore.impl;
 
 import me.theyinspire.pandora.core.datastore.BaseDataStoreTest;
 import me.theyinspire.pandora.core.datastore.DataStore;
-import me.theyinspire.pandora.core.datastore.impl.InMemoryDataStore;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

@@ -1,9 +1,8 @@
 package me.theyinspire.pandora.udp.server;
 
+import me.theyinspire.pandora.core.server.Server;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.ServerFactory;
-import me.theyinspire.pandora.core.server.Server;
-import me.theyinspire.pandora.udp.server.UdpServer;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

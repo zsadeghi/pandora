@@ -1,9 +1,8 @@
 package me.theyinspire.pandora.rmi.client;
 
+import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.client.ClientFactory;
-import me.theyinspire.pandora.core.client.Client;
-import me.theyinspire.pandora.rmi.client.RmiClient;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

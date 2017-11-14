@@ -25,7 +25,6 @@ public class RmiServer implements Server {
     private static final Log LOG = LogFactory.getLog("pandora.server.rmi");
     private final int port;
     private String name;
-    private Remote exportedObject;
     private final DataStore dataStore;
 
     public RmiServer(DataStore dataStore, int port) {
@@ -42,6 +41,7 @@ public class RmiServer implements Server {
     public void start() throws ServerException {
         LOG.info("Starting up the server");
         final RmiDataStore dataStore = new DelegatingRmiDataStore(this.dataStore, this);
+        final Remote exportedObject;
         try {
             exportedObject = UnicastRemoteObject.exportObject(dataStore, port);
         } catch (RemoteException e) {

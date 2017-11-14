@@ -1,8 +1,8 @@
 package me.theyinspire.pandora.core.datastore.cmd.impl;
 
+import me.theyinspire.pandora.core.datastore.cmd.*;
 import me.theyinspire.pandora.core.str.DocumentReader;
 import me.theyinspire.pandora.core.str.impl.DefaultDocumentReader;
-import me.theyinspire.pandora.core.datastore.cmd.*;
 
 import java.util.*;
 
