@@ -24,7 +24,6 @@ public class KissCliLauncher {
     }
 
     public static void main(String[] args) throws Exception {
-        args = "rmis".split(" ");
         if (args.length == 0) {
             printUsage();
             return;
@@ -96,24 +95,53 @@ public class KissCliLauncher {
     }
 
     private static void printUsage() {
-        System.out.println("Usage:");
-        System.out.println("Client:");
-        System.out.println("uc/tc");
-        System.out.println("store");
-        System.out.println("uc/tc");
-        System.out.println("key");
-        System.out.println("uc/tc");
-        System.out.println("by key");
-        System.out.println("uc/tc <address> <port> store  UDP/TCP CLIENT: Display object store");
-        System.out.println("uc/tc <address> <port> exit  UDP/TCP CLIENT: Shutdown server");
-        System.out.println("<address> <port> put <key> <msg> UDP/TCP CLIENT: Put an object into <address> <port> get <key> UDP/TCP CLIENT: Get an object from store by <address> <port> del <key> UDP/TCP CLIENT: Delete an object from store");
-        System.out.println("rmic <address> put <key> <msg> RMI CLIENT: Put an object into store rmic <address> get <key> RMI CLIENT: Get an object from store by key rmic <address> del <key> RMI CLIENT: Delete an object from store by key rmic <address> store RMI CLIENT: Display object store");
-        System.out.println("rmic <address> exit RMI CLIENT: Shutdown server");
-        System.out.println("Server:");
-        System.out.println("us/ts <port> UDP/TCP/TCP­and­UDP SERVER: run server on <port>.");
-        System.out.println("tus <tcpport> <udpport> TCP­and­UDP SERVER: run servers on <tcpport> and <udpport> sharing same key­value store.");
-        System.out.println("alls <tcpport> <udpport> TCP, UDP, and RMI SERVER: run servers on <tcpport> and <udpport> sharing same key­value store.");
-        System.out.println("rmic RMI Server.");
+        System.out.println("Usage: /path/to/launcher <options>");
+        System.out.println("");
+        System.out.println("Client mode:");
+        System.out.println("");
+        System.out.println("<client> <host> <port> <command>");
+        System.out.println("");
+        System.out.println("\t<client> can be one of:");
+        System.out.println("\t  * `tc` for TCP client");
+        System.out.println("\t  * `up` for UDP client");
+        System.out.println("\t  * `rc` for REST client");
+        System.out.println("\t  * `rmic` for RMI client");
+        System.out.println("\t<host> must be a valid INET name pointing at the server");
+        System.out.println("\t<port> must be a valid integer identifying the port on which the server is listening");
+        System.out.println("\t<command> can be one of:");
+        System.out.println("\t  * put <key> <value>");
+        System.out.println("\t    which will store <value> under key <key>");
+        System.out.println("\t  * get <key>");
+        System.out.println("\t    which will look up the value for <key>");
+        System.out.println("\t  * del <key>");
+        System.out.println("\t    which will delete the item stored under <key>");
+        System.out.println("\t  * has <key>");
+        System.out.println("\t    which will return `true` if there is an item for key <key>");
+        System.out.println("\t  * truncate");
+        System.out.println("\t    which will delete all items");
+        System.out.println("\t  * empty");
+        System.out.println("\t    which will return `true` if the data store is empty");
+        System.out.println("\t  * size");
+        System.out.println("\t    which will return the size of the data store");
+        System.out.println("\t  * store");
+        System.out.println("\t    which will return all items stored in the data store as `key:<key>:value:<value>:`");
+        System.out.println("");
+        System.out.println("Server mode:");
+        System.out.println("");
+        System.out.println("You can start the application in following server modes:");
+        System.out.println("");
+        System.out.println("* TCP server:");
+        System.out.println("\t /path/to/launcher ts <tcp-port>");
+        System.out.println("* UDP server:");
+        System.out.println("\t /path/to/launcher us <udp-port>");
+        System.out.println("* TCP+UDP server:");
+        System.out.println("\t /path/to/launcher tus <tcp-port> <udp-port>");
+        System.out.println("* RMI server:");
+        System.out.println("\t /path/to/launcher rmis");
+        System.out.println("* TCP+UDP+RMI server:");
+        System.out.println("\t /path/to/launcher alls <tcp-port> <udp-port>");
+        System.out.println("* REST server:");
+        System.out.println("\t /path/to/launcher rs <rest-port>");
     }
 
 }
