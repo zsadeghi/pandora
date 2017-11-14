@@ -8,7 +8,10 @@ import me.theyinspire.pandora.rmi.export.RmiDataStore;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.rmi.*;
+import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -77,11 +80,6 @@ public class RmiServer implements Server {
             throw new ServerException("Failed to unbind data store", e);
         } catch (NotBoundException e) {
             throw new ServerException("Data store is not bound", e);
-        }
-        try {
-            UnicastRemoteObject.unexportObject(exportedObject, true);
-        } catch (NoSuchObjectException e) {
-            throw new ServerException("No exported object was found for data store", e);
         }
     }
 

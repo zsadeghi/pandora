@@ -2,6 +2,7 @@ package me.theyinspire.pandora.kisscli;
 
 import me.theyinspire.pandora.cli.Launcher;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class KissCliLauncher {
     }
 
     public static void main(String[] args) throws Exception {
-        args = "alls 8080 8081".split(" ");
+        args = "rmis".split(" ");
         if (args.length == 0) {
             printUsage();
             return;
@@ -84,7 +85,7 @@ public class KissCliLauncher {
         return new String[]{
                 "server",
                 "--protocols=" + protocol,
-                "--" + protocol + "port=" + (protocol.equals("rmi") ? "9090" : args[1])
+                "--" + protocol + "-port=" + (protocol.equals("rmi") ? "9090" : args[1])
         };
     }
 

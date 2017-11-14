@@ -11,6 +11,7 @@ import me.theyinspire.pandora.core.datastore.impl.DefaultDataStoreRegistry;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.ProtocolRegistry;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
+import me.theyinspire.pandora.core.server.Server;
 import me.theyinspire.pandora.core.server.error.ServerException;
 
 import java.util.List;
@@ -35,11 +36,16 @@ public class Launcher {
                 System.out.println(response);
             } else if (ExecutionMode.SERVER.equals(executionConfiguration.getExecutionMode())) {
                 final ServerExecutionConfiguration configuration = (ServerExecutionConfiguration) executionConfiguration;
-                final List<Thread> serverThreads = configuration.getProtocols().stream()
+                final List<Server> servers = configuration.getProtocols().stream()
                         .map(configuration::getServerConfiguration)
                         .map(serverConfiguration -> protocolRegistry.getServer(serverConfiguration.getProtocol(), serverConfiguration))
+                        .collect(Collectors.toList());
+                final List<Thread> serverThreads = servers.stream()
                         .map(server -> new Thread(server::start))
                         .collect(Collectors.toList());
+                servers.forEach((server) -> {
+                    Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
+                });
                 serverThreads.forEach(Thread::start);
                 for (Thread serverThread : serverThreads) {
                     serverThread.join();
