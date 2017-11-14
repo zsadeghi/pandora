@@ -43,7 +43,7 @@ public class DefaultServerExecutionConfiguration extends AbstractExecutionConfig
             throw new IllegalArgumentException("No known data stores");
         }
         final DataStoreConfiguration configuration = getDataStoreConfiguration();
-        return registry.get(get("data-store", knownDataStores.get(0)), getDataStoreConfiguration());
+        return registry.get(get("data-store", knownDataStores.get(0)), configuration);
     }
 
     private List<Protocol> deduceProtocols() {

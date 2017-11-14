@@ -40,7 +40,7 @@ public class DefaultDataStoreRegistry implements DataStoreRegistry {
         if (!factories.containsKey(name)) {
             throw new IllegalArgumentException("Unknown data store: " + name);
         }
-        return factories.get(name).getDataStore(configuration);
+        return new SynchronizedDataStore(factories.get(name).getDataStore(configuration));
     }
 
     @Override
