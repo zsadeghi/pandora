@@ -25,7 +25,7 @@ public class RestProtocol implements Protocol {
 
     @Override
     public void defineOptions(ProtocolOptionRegistry registry) {
-        registry.register("host", "The host name", "localhost");
+        registry.register("host", "The host name", "0.0.0.0");
         registry.register("port", "The communication port", "8080");
         registry.register("base", "The context path for the REST endpoints", "/");
     }

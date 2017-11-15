@@ -54,9 +54,9 @@ public class KissCliLauncher {
         actualArgs = new String[args.length + 2];
         actualArgs[0] = "client";
         actualArgs[1] = "--protocol=" + protocol;
-        actualArgs[2] = "--host=" + args[1];
+        actualArgs[2] = "--" + protocol + "-host=" + args[1];
         if (!protocol.equals("rmi")) {
-            actualArgs[3] = "--port=" + args[2];
+            actualArgs[3] = "--" + protocol + "-port=" + args[2];
         }
         actualArgs[3 + offset] = "--";
         System.arraycopy(args, 2 + offset, actualArgs, 5, args.length - 2 - offset);
