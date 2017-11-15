@@ -23,6 +23,7 @@ public class KissCliLauncher {
     }
 
     public static void main(String[] args) throws Exception {
+        args = "rmic localhost size".split(" ");
         if (args.length == 0) {
             printUsage();
             return;
@@ -59,7 +60,7 @@ public class KissCliLauncher {
             actualArgs[3] = "--" + protocol + "-port=" + args[2];
         }
         actualArgs[3 + offset] = "--";
-        System.arraycopy(args, 2 + offset, actualArgs, 5, args.length - 2 - offset);
+        System.arraycopy(args, 2 + offset, actualArgs, 4 + offset, args.length - 2 - offset);
         return actualArgs;
     }
 
