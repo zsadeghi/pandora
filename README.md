@@ -52,3 +52,11 @@ only an in-memory data store is implemented, but this can be easily extended.
 
 All data store implementations are wrapped in a monitor, so that regardless of implementation, data store access
 is always synchronized.
+
+### Considerations
+
+The TCP communication protocl expects all messages to be sandwiched between `^<<` and `^>>&`. For instance, if you are
+using telnet to communicate, to list all data you will have to send `^<<store^>>&`, and the answer will also be contained
+in the same way.
+
+This is to allow for multiline communication, or communication not punctuated by the newline feed character.
