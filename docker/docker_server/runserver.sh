@@ -9,6 +9,6 @@ java -jar GenericNode.jar
 #java -jar GenericNode.jar us 1234
 
 #RMI Server
-#rmiregistry -J-Djava.class.path=GenericNode.jar &
-#java -Djava.rmi.server.codebase=file:GenericNode.jar -cp GenericNode.jar genericnode.GenericNode rmis 
+#rmiregistry -J-Djava.rmi.server.useCodebaseOnly=false &
+#java -Djava.rmi.server.codebase=file:GenericNode.jar -jar GenericNode.jar rmis
 
