@@ -23,7 +23,6 @@ public class KissCliLauncher {
     }
 
     public static void main(String[] args) throws Exception {
-        args = "rmic localhost size".split(" ");
         if (args.length == 0) {
             printUsage();
             return;
