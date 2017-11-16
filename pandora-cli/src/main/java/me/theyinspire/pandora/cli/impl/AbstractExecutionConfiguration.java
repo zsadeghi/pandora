@@ -24,5 +24,4 @@ public abstract class AbstractExecutionConfiguration extends AbstractConfigurati
         return mode;
     }
 
-
 }
