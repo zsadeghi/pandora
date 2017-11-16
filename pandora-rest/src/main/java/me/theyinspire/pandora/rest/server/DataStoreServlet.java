@@ -7,6 +7,8 @@ import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
 import me.theyinspire.pandora.core.server.error.ServerException;
 import me.theyinspire.pandora.rest.protocol.RequestMethod;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -22,11 +24,11 @@ import java.io.IOException;
  */
 public class DataStoreServlet extends HttpServlet {
 
+    private static final Log LOG = LogFactory.getLog("pandora.server.rest");
     private static final long serialVersionUID = -727378734335803763L;
     private final DataStoreCommandDispatcher dispatcher;
     private final ObjectMapper mapper;
     private final RestServer server;
-
 
     public DataStoreServlet(DataStore dataStore, ObjectMapper mapper, RestServer server) {
         dispatcher = new DataStoreCommandDispatcher(dataStore);
@@ -70,6 +72,7 @@ public class DataStoreServlet extends HttpServlet {
         final DataStoreCommand<?> command = getCommand(method, request);
         final Object result;
         try {
+            LOG.info("Executing command: " + command);
             result = dispatcher.dispatch(command);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

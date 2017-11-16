@@ -105,7 +105,7 @@ public final class DataStoreCommands {
 
         @Override
         public String toString() {
-            return "{get(" + key + "}";
+            return "{get(" + key + ")}";
         }
     }
 
