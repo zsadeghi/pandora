@@ -65,8 +65,18 @@ public class Launcher {
         }
     }
 
+    private static void loadPropertyClasses(String property) throws ClassNotFoundException {
+        final String stores = System.getProperty(property);
+        if (stores != null) {
+            for (String className : stores.split("\\s*,\\s*")) {
+                Class.forName(className);
+            }
+        }
+    }
+
     private static DataStoreRegistry setUpDataStoreRegistry() throws ClassNotFoundException {
         Class.forName("me.theyinspire.pandora.core.datastore.mem.Loader");
+        loadPropertyClasses("pandora.stores");
         return DefaultDataStoreRegistry.getInstance();
     }
 
@@ -75,6 +85,7 @@ public class Launcher {
         Class.forName("me.theyinspire.pandora.rmi.Loader");
         Class.forName("me.theyinspire.pandora.udp.Loader");
         Class.forName("me.theyinspire.pandora.rest.Loader");
+        loadPropertyClasses("pandora.protocols");
         return DefaultProtocolRegistry.getInstance();
     }
 
@@ -142,6 +153,14 @@ public class Launcher {
                 System.out.println("\t\t" + option.getDescription());
             }
         }
+        System.out.println();
+        System.out.println("Note: to add support for additional data store types and protocol types, you");
+        System.out.println("can pass in JVM options `pandora.stores` and `pandora.protocols` respectively.");
+        System.out.println("These properties must be comma-separated fully qualified names of loader");
+        System.out.println("classes which will statically bind and register the given data store/protocol.");
+        System.out.println("For example:");
+        System.out.println("-Dpandora.protocols=my.protocol.package.Loader /path/to/launcher");
+        System.out.println("These classes will be loaded in addition to the already supported classes.");
     }
 
     private static void printError(Throwable exception) {
