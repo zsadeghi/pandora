@@ -1,9 +1,6 @@
 package me.theyinspire.pandora.core.config.impl;
 
-import me.theyinspire.pandora.core.config.Option;
-import me.theyinspire.pandora.core.config.OptionRegistry;
-import me.theyinspire.pandora.core.config.ProtocolOption;
-import me.theyinspire.pandora.core.config.ProtocolOptionRegistry;
+import me.theyinspire.pandora.core.config.*;
 import me.theyinspire.pandora.core.protocol.Protocol;
 
 import java.util.*;
@@ -21,39 +18,56 @@ public class DefaultOptionRegistry implements OptionRegistry {
     }
 
     private final Map<String, List<ProtocolOption>> protocolOptions;
+    private final Map<String, List<DataStoreOption>> dataStoreOptions;
+    private final Map<String, Protocol> protocols;
 
     private DefaultOptionRegistry() {
         protocolOptions = new HashMap<>();
+        protocols = new HashMap<>();
+        dataStoreOptions = new HashMap<>();
     }
 
     @Override
     public List<ProtocolOption> getProtocolOptions(Protocol protocol) {
+        if (!protocolOptions.containsKey(protocol.getName())) {
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableList(protocolOptions.get(protocol.getName()));
     }
 
     @Override
-    public ProtocolOptionRegistry getProtocolOptionRegistry(Protocol protocol) {
-        return new DefaultProtocolOptionRegistry(protocol);
+    public List<DataStoreOption> getDataStoreOptions(String dataStore) {
+        if (!dataStoreOptions.containsKey(dataStore)) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(dataStoreOptions.get(dataStore));
     }
 
-    private class DefaultProtocolOptionRegistry implements ProtocolOptionRegistry {
+    @Override
+    public ScopedOptionRegistry getProtocolOptionRegistry(Protocol protocol) {
+        if (!protocols.containsKey(protocol.getName())) {
+            protocols.put(protocol.getName(), protocol);
+        }
+        return new ProtocolOptionRegistry(protocol.getName(), protocolOptions);
+    }
 
-        private final Protocol protocol;
+    @Override
+    public ScopedOptionRegistry getDataStoreOptionRegistry(String dataStore) {
+        return new DataStoreOptionRegistry(dataStore, dataStoreOptions);
+    }
 
-        private DefaultProtocolOptionRegistry(Protocol protocol) {
-            this.protocol = protocol;
+    private static abstract class AbstractScopedOptionRegistry implements ScopedOptionRegistry {
+
+        private final String scope;
+        private final Map<String, ?> options;
+
+        private AbstractScopedOptionRegistry(String scope, Map<String, ?> options) {
+            this.scope = scope;
+            this.options = options;
         }
 
-        @Override
-        public void register(String name, String description, String defaultValue) {
-            final List<ProtocolOption> list;
-            if (protocolOptions.containsKey(protocol.getName())) {
-                list = DefaultOptionRegistry.this.protocolOptions.get(protocol.getName());
-            } else {
-                list = new ArrayList<>();
-            }
-            list.add(new ImmutableProtocolOption(name, description, defaultValue, protocol));
-            protocolOptions.put(protocol.getName(), list);
+        String getScope() {
+            return scope;
         }
 
         @Override
@@ -63,19 +77,64 @@ public class DefaultOptionRegistry implements OptionRegistry {
 
         @Override
         public String getDefaultValue(String name, String fallback) {
-            if (!protocolOptions.containsKey(protocol.getName())) {
+            if (!options.containsKey(scope)) {
                 return fallback;
             }
-            return protocolOptions.get(protocol.getName()).stream()
+            return getOptions(scope).stream()
                     .filter(option -> option.getName().equals(name))
                     .map(Option::getDefaultValue)
                     .findFirst()
                     .orElse(fallback);
         }
 
+        private List<? extends Option> getOptions(String scope) {
+            //noinspection unchecked
+            return (List<? extends Option>) options.get(scope);
+        }
+
         @Override
         public String getDefaultValue(String name) {
             return getDefaultValue(name, null);
+        }
+
+    }
+
+    private class ProtocolOptionRegistry extends AbstractScopedOptionRegistry {
+
+        private ProtocolOptionRegistry(String scope, Map<String, ?> options) {
+            super(scope, options);
+        }
+
+        @Override
+        public void register(String name, String description, String defaultValue) {
+            final List<ProtocolOption> list;
+            if (protocolOptions.containsKey(getScope())) {
+                list = DefaultOptionRegistry.this.protocolOptions.get(getScope());
+            } else {
+                list = new ArrayList<>();
+            }
+            list.add(new ImmutableProtocolOption(name, description, defaultValue, protocols.get(getScope())));
+            protocolOptions.put(getScope(), list);
+        }
+
+    }
+
+    private class DataStoreOptionRegistry extends AbstractScopedOptionRegistry {
+
+        private DataStoreOptionRegistry(String scope, Map<String, ?> options) {
+            super(scope, options);
+        }
+
+        @Override
+        public void register(String name, String description, String defaultValue) {
+            final List<DataStoreOption> list;
+            if (dataStoreOptions.containsKey(getScope())) {
+                list = DefaultOptionRegistry.this.dataStoreOptions.get(getScope());
+            } else {
+                list = new ArrayList<>();
+            }
+            list.add(new ImmutableDataStoreOption(name, description, defaultValue, getScope()));
+            dataStoreOptions.put(getScope(), list);
         }
 
     }

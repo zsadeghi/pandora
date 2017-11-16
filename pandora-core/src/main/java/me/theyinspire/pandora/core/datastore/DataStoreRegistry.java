@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface DataStoreRegistry {
 
-    void register(String name, DataStoreFactory factory);
+    void register(DataStoreFactory factory);
 
     DataStore get(String name, DataStoreConfiguration configuration);
 

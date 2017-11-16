@@ -4,6 +4,7 @@ import me.theyinspire.pandora.cli.error.ConfigurationException;
 import me.theyinspire.pandora.cli.impl.DefaultConfigurationReader;
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.error.ClientException;
+import me.theyinspire.pandora.core.config.DataStoreOption;
 import me.theyinspire.pandora.core.config.Option;
 import me.theyinspire.pandora.core.config.ProtocolOption;
 import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
@@ -135,24 +136,8 @@ public class Launcher {
         System.out.println("\t\tA comma-separated list of protocols to use. Can be a subset of " + protocolRegistry.getKnownProtocols().stream().map(Protocol::getName).sorted().collect(Collectors.toList()));
         System.out.println("\t[--data-store=" + defaultDataStore + "]");
         System.out.println("\t\tThe data store instance to use. Can be one of " + dataStoreRegistry.getKnownDataStores());
-        System.out.println();
-        System.out.println("Protocol specific options are:");
-        for (Protocol protocol : protocolRegistry.getKnownProtocols()) {
-            final List<ProtocolOption> options = DefaultOptionRegistry.getInstance().getProtocolOptions(protocol);
-            for (Option option : options) {
-                System.out.print("\t");
-                if (option.isOptional()) {
-                    System.out.print("[");
-                }
-                System.out.print("--" + protocol.getName() + "-" + option.getName());
-                if (option.isOptional()) {
-                    System.out.print("=" + option.getDefaultValue());
-                    System.out.print("]");
-                }
-                System.out.println();
-                System.out.println("\t\t" + option.getDescription());
-            }
-        }
+        printProtocolOptions(protocolRegistry);
+        printDataStoreOptions(dataStoreRegistry);
         System.out.println();
         System.out.println("Note: to add support for additional data store types and protocol types, you");
         System.out.println("can pass in JVM options `pandora.stores` and `pandora.protocols` respectively.");
@@ -161,6 +146,49 @@ public class Launcher {
         System.out.println("For example:");
         System.out.println("-Dpandora.protocols=my.protocol.package.Loader /path/to/launcher");
         System.out.println("These classes will be loaded in addition to the already supported classes.");
+    }
+
+    private static void printDataStoreOptions(DataStoreRegistry dataStoreRegistry) {
+        final Integer totalOptions = dataStoreRegistry.getKnownDataStores().stream()
+                .map(DefaultOptionRegistry.getInstance()::getDataStoreOptions)
+                .map(List::size)
+                .reduce(Integer::sum)
+                .orElse(0);
+        if (totalOptions == 0) {
+            return;
+        }
+        System.out.println();
+        System.out.println("Data store specific options are:");
+        for (String dataStore : dataStoreRegistry.getKnownDataStores()) {
+            final List<DataStoreOption> options = DefaultOptionRegistry.getInstance().getDataStoreOptions(dataStore);
+            printOptions("ds-", dataStore, options);
+        }
+    }
+
+    private static void printProtocolOptions(ProtocolRegistry protocolRegistry) {
+        System.out.println();
+        System.out.println("Protocol specific options are:");
+        for (Protocol protocol : protocolRegistry.getKnownProtocols()) {
+            final String prefix = protocol.getName();
+            final List<ProtocolOption> options = DefaultOptionRegistry.getInstance().getProtocolOptions(protocol);
+            printOptions("", prefix, options);
+        }
+    }
+
+    private static void printOptions(String prefix, String name, List<? extends Option> options) {
+        for (Option option : options) {
+            System.out.print("\t");
+            if (option.isOptional()) {
+                System.out.print("[");
+            }
+            System.out.print("--" + prefix + name + "-" + option.getName());
+            if (option.isOptional()) {
+                System.out.print("=" + option.getDefaultValue());
+                System.out.print("]");
+            }
+            System.out.println();
+            System.out.println("\t\t" + option.getDescription());
+        }
     }
 
     private static void printError(Throwable exception) {

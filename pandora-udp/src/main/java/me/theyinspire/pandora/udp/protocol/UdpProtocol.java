@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.udp.protocol;
 
-import me.theyinspire.pandora.core.config.ProtocolOptionRegistry;
+import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
 import me.theyinspire.pandora.core.protocol.Protocol;
 
 /**
@@ -24,7 +24,7 @@ public class UdpProtocol implements Protocol {
     }
 
     @Override
-    public void defineOptions(ProtocolOptionRegistry registry) {
+    public void defineOptions(ScopedOptionRegistry registry) {
         registry.register("host", "The host name", "0.0.0.0");
         registry.register("port", "The communication port", "8082");
     }

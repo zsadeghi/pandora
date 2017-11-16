@@ -4,7 +4,7 @@ import me.theyinspire.pandora.cli.ClientExecutionConfiguration;
 import me.theyinspire.pandora.cli.ExecutionMode;
 import me.theyinspire.pandora.cli.error.ConfigurationException;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
-import me.theyinspire.pandora.core.config.ProtocolOptionRegistry;
+import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
 import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
@@ -52,7 +52,7 @@ public class DefaultClientExecutionConfiguration extends AbstractExecutionConfig
     private class DefaultClientConfiguration implements ClientConfiguration {
 
         private String getDefault(String key) {
-            final ProtocolOptionRegistry registry = DefaultOptionRegistry.getInstance().getProtocolOptionRegistry(getProtocol());
+            final ScopedOptionRegistry registry = DefaultOptionRegistry.getInstance().getProtocolOptionRegistry(getProtocol());
             final String defaultValue = registry.getDefaultValue(key, null);
             if (defaultValue == null) {
                 throw new ConfigurationException("Missing required argument: " + prefix(key));

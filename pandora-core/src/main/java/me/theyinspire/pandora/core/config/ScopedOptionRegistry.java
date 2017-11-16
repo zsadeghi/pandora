@@ -4,7 +4,7 @@ package me.theyinspire.pandora.core.config;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (11/12/17, 2:15 AM)
  */
-public interface ProtocolOptionRegistry {
+public interface ScopedOptionRegistry {
 
     void register(String name, String description, String defaultValue);
 

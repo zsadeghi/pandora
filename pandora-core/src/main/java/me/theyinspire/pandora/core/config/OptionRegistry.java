@@ -12,6 +12,10 @@ public interface OptionRegistry {
 
     List<ProtocolOption> getProtocolOptions(Protocol protocol);
 
-    ProtocolOptionRegistry getProtocolOptionRegistry(Protocol protocol);
+    List<DataStoreOption> getDataStoreOptions(String dataStore);
+
+    ScopedOptionRegistry getProtocolOptionRegistry(Protocol protocol);
+
+    ScopedOptionRegistry getDataStoreOptionRegistry(String dataStore);
 
 }

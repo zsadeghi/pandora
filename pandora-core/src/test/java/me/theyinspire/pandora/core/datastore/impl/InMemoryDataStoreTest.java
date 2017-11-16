@@ -12,7 +12,7 @@ public class InMemoryDataStoreTest extends BaseDataStoreTest {
 
     @Override
     protected DataStore getDataStore() {
-        return new InMemoryDataStore();
+        return new InMemoryDataStore(100);
     }
 
 }

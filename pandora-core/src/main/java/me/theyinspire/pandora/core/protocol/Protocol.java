@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.core.protocol;
 
-import me.theyinspire.pandora.core.config.ProtocolOptionRegistry;
+import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -22,6 +22,6 @@ public interface Protocol {
         return message;
     }
 
-    void defineOptions(ProtocolOptionRegistry registry);
+    void defineOptions(ScopedOptionRegistry registry);
 
 }

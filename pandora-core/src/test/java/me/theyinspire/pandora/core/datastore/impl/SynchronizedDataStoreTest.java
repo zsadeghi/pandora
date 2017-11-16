@@ -12,7 +12,7 @@ public class SynchronizedDataStoreTest extends BaseDataStoreTest {
 
     @Override
     protected DataStore getDataStore() {
-        return new SynchronizedDataStore(new InMemoryDataStore());
+        return new SynchronizedDataStore(new InMemoryDataStore(100));
     }
 
 }

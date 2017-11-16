@@ -3,7 +3,7 @@ package me.theyinspire.pandora.core.protocol.impl;
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.client.ClientFactory;
-import me.theyinspire.pandora.core.config.ProtocolOptionRegistry;
+import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
 import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.ProtocolRegistry;
@@ -44,7 +44,7 @@ public class DefaultProtocolRegistry implements ProtocolRegistry {
         knownProtocols.add(protocol);
         clientFactories.put(protocol, clientFactory);
         serverFactories.put(protocol, serverFactory);
-        final ProtocolOptionRegistry optionRegistry = DefaultOptionRegistry.getInstance().getProtocolOptionRegistry(protocol);
+        final ScopedOptionRegistry optionRegistry = DefaultOptionRegistry.getInstance().getProtocolOptionRegistry(protocol);
         protocol.defineOptions(optionRegistry);
     }
 

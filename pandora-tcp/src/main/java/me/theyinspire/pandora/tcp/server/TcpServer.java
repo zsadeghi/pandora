@@ -26,7 +26,7 @@ public class TcpServer extends AbstractServer<TcpProtocol, SimpleIncoming, Simpl
     private final TcpProtocol protocol;
 
     public TcpServer(InetAddress inetAddress, int port) {
-        this(inetAddress, port, new InMemoryDataStore());
+        this(inetAddress, port, new InMemoryDataStore(100));
     }
 
     public TcpServer(InetAddress inetAddress, int port, DataStore dataStore) {

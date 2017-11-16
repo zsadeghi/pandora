@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.tcp.protocol;
 
-import me.theyinspire.pandora.core.config.ProtocolOptionRegistry;
+import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
 import me.theyinspire.pandora.core.protocol.impl.AbstractProtocol;
 
 /**
@@ -33,7 +33,7 @@ public class TcpProtocol extends AbstractProtocol<TcpProtocolReader, TcpProtocol
     }
 
     @Override
-    public void defineOptions(ProtocolOptionRegistry registry) {
+    public void defineOptions(ScopedOptionRegistry registry) {
         registry.register("host", "The host name", "0.0.0.0");
         registry.register("port", "The communication port", "8081");
     }
