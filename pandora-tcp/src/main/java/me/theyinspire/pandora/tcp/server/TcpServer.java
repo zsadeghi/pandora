@@ -1,7 +1,7 @@
 package me.theyinspire.pandora.tcp.server;
 
 import me.theyinspire.pandora.core.datastore.DataStore;
-import me.theyinspire.pandora.core.datastore.mem.InMemoryDataStore;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.error.ServerException;
 import me.theyinspire.pandora.core.server.impl.AbstractServer;
 import me.theyinspire.pandora.core.server.impl.SimpleIncoming;
@@ -25,12 +25,12 @@ public class TcpServer extends AbstractServer<TcpProtocol, SimpleIncoming, Simpl
     private final int port;
     private final TcpProtocol protocol;
 
-    public TcpServer(InetAddress inetAddress, int port) {
-        this(inetAddress, port, new InMemoryDataStore(100));
+    public TcpServer(ServerConfiguration configuration, InetAddress inetAddress, int port) {
+        this(configuration, inetAddress, port, configuration.getDataStore());
     }
 
-    public TcpServer(InetAddress inetAddress, int port, DataStore dataStore) {
-        super(dataStore);
+    public TcpServer(ServerConfiguration configuration, InetAddress inetAddress, int port, DataStore dataStore) {
+        super(configuration, dataStore);
         this.inetAddress = inetAddress;
         this.port = port;
         protocol = TcpProtocol.getInstance();

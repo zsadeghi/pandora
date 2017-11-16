@@ -15,7 +15,7 @@ public class TcpServerFactory implements ServerFactory {
     @Override
     public Server getInstance(ServerConfiguration configuration) {
         try {
-            return new TcpServer(InetAddress.getByName(configuration.getHost()), configuration.getPort(), configuration.getDataStore());
+            return new TcpServer(configuration, InetAddress.getByName(configuration.getHost()), configuration.getPort(), configuration.getDataStore());
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Invalid host name", e);
         }

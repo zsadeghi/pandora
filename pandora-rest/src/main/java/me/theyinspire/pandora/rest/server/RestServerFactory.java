@@ -12,7 +12,7 @@ public class RestServerFactory implements ServerFactory {
 
     @Override
     public Server getInstance(ServerConfiguration configuration) {
-        return new RestServer(configuration.getHost(), configuration.getPort(), configuration.get("base", "/"), configuration.getDataStore());
+        return new RestServer(configuration, configuration.getHost(), configuration.getPort(), configuration.get("base", "/"), configuration.getDataStore());
     }
 
 }

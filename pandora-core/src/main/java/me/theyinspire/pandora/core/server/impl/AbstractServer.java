@@ -27,14 +27,21 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
     private final DataStoreCommandDispatcher dispatcher;
     private final CommandSerializer serializer;
     private final CommandDeserializer deserializer;
+    private final ServerConfiguration configuration;
     private boolean running;
 
-    public AbstractServer(DataStore dataStore) {
+    public AbstractServer(ServerConfiguration configuration, DataStore dataStore) {
+        this.configuration = configuration;
         executor = Executors.newFixedThreadPool(BACKLOG);
         dispatcher = new DataStoreCommandDispatcher(dataStore);
         running = false;
         serializer = AggregateCommandSerializer.getInstance();
         deserializer = AggregateCommandDeserializer.getInstance();
+    }
+
+    @Override
+    public ServerConfiguration getConfiguration() {
+        return configuration;
     }
 
     @Override

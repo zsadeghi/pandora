@@ -2,6 +2,7 @@ package me.theyinspire.pandora.rmi.server;
 
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.server.Server;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.error.ServerException;
 import me.theyinspire.pandora.rmi.export.DelegatingRmiDataStore;
 import me.theyinspire.pandora.rmi.export.RmiDataStore;
@@ -24,17 +25,24 @@ public class RmiServer implements Server {
 
     private static final Log LOG = LogFactory.getLog("pandora.server.rmi");
     private final int port;
+    private final ServerConfiguration configuration;
     private String name;
     private final DataStore dataStore;
 
-    public RmiServer(DataStore dataStore, int port) {
-        this(dataStore, "dataStore", port);
+    public RmiServer(ServerConfiguration configuration, DataStore dataStore, int port) {
+        this(configuration, dataStore, "dataStore", port);
     }
 
-    public RmiServer(DataStore dataStore, String name, int port) {
+    public RmiServer(ServerConfiguration configuration, DataStore dataStore, String name, int port) {
+        this.configuration = configuration;
         this.port = port;
         this.name = name;
         this.dataStore = dataStore;
+    }
+
+    @Override
+    public ServerConfiguration getConfiguration() {
+        return configuration;
     }
 
     @Override

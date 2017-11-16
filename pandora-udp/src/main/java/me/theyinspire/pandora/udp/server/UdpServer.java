@@ -1,6 +1,7 @@
 package me.theyinspire.pandora.udp.server;
 
 import me.theyinspire.pandora.core.datastore.DataStore;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.error.ServerException;
 import me.theyinspire.pandora.core.server.impl.AbstractServer;
 import me.theyinspire.pandora.udp.protocol.UdpProtocol;
@@ -22,8 +23,8 @@ public class UdpServer extends AbstractServer<UdpProtocol, UdpIncoming, UdpOutgo
     private final InetAddress address;
     private final int port;
 
-    public UdpServer(DataStore dataStore, InetAddress address, int port) {
-        super(dataStore);
+    public UdpServer(ServerConfiguration configuration, DataStore dataStore, InetAddress address, int port) {
+        super(configuration, dataStore);
         this.address = address;
         this.port = port;
         protocol = UdpProtocol.getInstance();

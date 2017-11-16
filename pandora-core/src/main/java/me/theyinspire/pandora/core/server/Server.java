@@ -8,6 +8,8 @@ import me.theyinspire.pandora.core.server.error.ServerException;
  */
 public interface Server {
 
+    ServerConfiguration getConfiguration();
+
     void start() throws ServerException;
 
     void stop() throws ServerException;

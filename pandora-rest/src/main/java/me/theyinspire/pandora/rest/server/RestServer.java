@@ -2,6 +2,7 @@ package me.theyinspire.pandora.rest.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.theyinspire.pandora.core.datastore.DataStore;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.error.ServerException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,6 +20,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class RestServer implements me.theyinspire.pandora.core.server.Server {
 
     private static final Log LOG = LogFactory.getLog("pandora.server.rest");
+    private final ServerConfiguration configuration;
     private final String hostname;
     private final int port;
     private final String contextPath;
@@ -26,7 +28,8 @@ public class RestServer implements me.theyinspire.pandora.core.server.Server {
     private Server server;
     private Thread serverThread;
 
-    public RestServer(String hostname, int port, String contextPath, DataStore dataStore) {
+    public RestServer(ServerConfiguration configuration, String hostname, int port, String contextPath, DataStore dataStore) {
+        this.configuration = configuration;
         this.hostname = hostname;
         this.port = port;
         this.contextPath = contextPath == null ? "" : contextPath
@@ -34,6 +37,11 @@ public class RestServer implements me.theyinspire.pandora.core.server.Server {
                 .replaceFirst("^/", "")
                 .replaceFirst("/$", "");
         this.dataStore = dataStore;
+    }
+
+    @Override
+    public ServerConfiguration getConfiguration() {
+        return configuration;
     }
 
     @Override

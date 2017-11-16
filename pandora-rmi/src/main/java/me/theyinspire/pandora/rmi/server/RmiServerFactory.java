@@ -11,6 +11,6 @@ import me.theyinspire.pandora.core.server.ServerFactory;
 public class RmiServerFactory implements ServerFactory {
     @Override
     public Server getInstance(ServerConfiguration configuration) {
-        return new RmiServer(configuration.getDataStore(), configuration.require("instance"), configuration.getPort());
+        return new RmiServer(configuration, configuration.getDataStore(), configuration.require("instance"), configuration.getPort());
     }
 }

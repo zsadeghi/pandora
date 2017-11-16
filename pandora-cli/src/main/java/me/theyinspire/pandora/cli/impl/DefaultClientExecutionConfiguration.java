@@ -2,9 +2,9 @@ package me.theyinspire.pandora.cli.impl;
 
 import me.theyinspire.pandora.cli.ClientExecutionConfiguration;
 import me.theyinspire.pandora.cli.ExecutionMode;
+import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.config.impl.DefaultClientConfiguration;
 import me.theyinspire.pandora.core.error.ConfigurationException;
-import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
 
@@ -30,7 +30,7 @@ public class DefaultClientExecutionConfiguration extends AbstractExecutionConfig
         }
         final Protocol defaultProtocol = knownProtocols.get(0);
         protocol = DefaultProtocolRegistry.getInstance().getProtocolByName(get("protocol", defaultProtocol.getName()));
-        configuration = new DefaultClientConfiguration(this);
+        configuration = new DefaultClientConfiguration(this, protocol);
     }
 
     @Override

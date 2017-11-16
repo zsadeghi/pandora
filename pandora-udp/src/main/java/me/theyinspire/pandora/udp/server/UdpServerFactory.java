@@ -15,7 +15,7 @@ public class UdpServerFactory implements ServerFactory {
     @Override
     public Server getInstance(ServerConfiguration configuration) {
         try {
-            return new UdpServer(configuration.getDataStore(), InetAddress.getByName(configuration.getHost()), configuration.getPort());
+            return new UdpServer(configuration, configuration.getDataStore(), InetAddress.getByName(configuration.getHost()), configuration.getPort());
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Invalid host name", e);
         }
