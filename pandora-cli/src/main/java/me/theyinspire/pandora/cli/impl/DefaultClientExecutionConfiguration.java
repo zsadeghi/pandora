@@ -2,10 +2,9 @@ package me.theyinspire.pandora.cli.impl;
 
 import me.theyinspire.pandora.cli.ClientExecutionConfiguration;
 import me.theyinspire.pandora.cli.ExecutionMode;
-import me.theyinspire.pandora.cli.error.ConfigurationException;
+import me.theyinspire.pandora.core.config.impl.DefaultClientConfiguration;
+import me.theyinspire.pandora.core.error.ConfigurationException;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
-import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
-import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
 
@@ -31,7 +30,7 @@ public class DefaultClientExecutionConfiguration extends AbstractExecutionConfig
         }
         final Protocol defaultProtocol = knownProtocols.get(0);
         protocol = DefaultProtocolRegistry.getInstance().getProtocolByName(get("protocol", defaultProtocol.getName()));
-        configuration = new DefaultClientConfiguration();
+        configuration = new DefaultClientConfiguration(this);
     }
 
     @Override
@@ -47,58 +46,6 @@ public class DefaultClientExecutionConfiguration extends AbstractExecutionConfig
     @Override
     public String getCommand() {
         return command;
-    }
-
-    private class DefaultClientConfiguration implements ClientConfiguration {
-
-        private String getDefault(String key) {
-            final ScopedOptionRegistry registry = DefaultOptionRegistry.getInstance().getProtocolOptionRegistry(getProtocol());
-            final String defaultValue = registry.getDefaultValue(key, null);
-            if (defaultValue == null) {
-                throw new ConfigurationException("Missing required argument: " + prefix(key));
-            }
-            return defaultValue;
-        }
-
-        private String prefix(String key) {
-            return DefaultClientExecutionConfiguration.this.getProtocol().getName() + "-" + key;
-        }
-
-        @Override
-        public String get(String key) {
-            return DefaultClientExecutionConfiguration.this.get(prefix(key));
-        }
-
-        @Override
-        public String require(String key) {
-            return DefaultClientExecutionConfiguration.this.get(prefix(key), getDefault(key));
-        }
-
-        @Override
-        public String get(String key, String defaultValue) {
-            return DefaultClientExecutionConfiguration.this.get(prefix(key), defaultValue);
-        }
-
-        @Override
-        public boolean has(String key) {
-            return DefaultClientExecutionConfiguration.this.has(prefix(key));
-        }
-
-        @Override
-        public Protocol getProtocol() {
-            return DefaultClientExecutionConfiguration.this.getProtocol();
-        }
-
-        @Override
-        public String getHost() {
-            return require("host");
-        }
-
-        @Override
-        public int getPort() {
-            return Integer.parseInt(require("port"));
-        }
-
     }
 
 }

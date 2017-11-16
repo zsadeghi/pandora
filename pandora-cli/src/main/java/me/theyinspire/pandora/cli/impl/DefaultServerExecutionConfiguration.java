@@ -2,9 +2,8 @@ package me.theyinspire.pandora.cli.impl;
 
 import me.theyinspire.pandora.cli.ExecutionMode;
 import me.theyinspire.pandora.cli.ServerExecutionConfiguration;
-import me.theyinspire.pandora.cli.error.ConfigurationException;
-import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
-import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
+import me.theyinspire.pandora.core.config.impl.DefaultDataStoreConfiguration;
+import me.theyinspire.pandora.core.config.impl.DefaultServerConfiguration;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
 import me.theyinspire.pandora.core.datastore.DataStoreRegistry;
@@ -32,11 +31,11 @@ public class DefaultServerExecutionConfiguration extends AbstractExecutionConfig
         super(ExecutionMode.SERVER, data);
         this.protocols = Collections.unmodifiableList(deduceProtocols());
         this.dataStoreName = deduceDataStoreName();
-        dataStoreConfiguration = new DefaultDataStoreConfiguration(dataStoreName);
+        dataStoreConfiguration = new DefaultDataStoreConfiguration(this, dataStoreName);
         this.dataStore = deduceDataStore();
         configurations = new HashMap<>();
         for (Protocol protocol : protocols) {
-            configurations.put(protocol, new DefaultServerConfiguration(protocol));
+            configurations.put(protocol, new DefaultServerConfiguration(this, protocol, dataStore));
         }
     }
 
@@ -90,111 +89,6 @@ public class DefaultServerExecutionConfiguration extends AbstractExecutionConfig
     @Override
     public DataStoreConfiguration getDataStoreConfiguration() {
         return dataStoreConfiguration;
-    }
-
-    private class DefaultServerConfiguration implements ServerConfiguration {
-
-        private final Protocol protocol;
-
-        private DefaultServerConfiguration(Protocol protocol) {
-            this.protocol = protocol;
-        }
-
-        private String prefix(String key) {
-            return protocol.getName() + "-" + key;
-        }
-
-        private String getDefault(String key) {
-            final ScopedOptionRegistry registry = DefaultOptionRegistry.getInstance().getProtocolOptionRegistry(getProtocol());
-            final String defaultValue = registry.getDefaultValue(key, null);
-            if (defaultValue == null) {
-                throw new ConfigurationException("Missing required argument: " + prefix(key));
-            }
-            return defaultValue;
-        }
-
-        @Override
-        public String get(String key) {
-            return DefaultServerExecutionConfiguration.this.get(prefix(key));
-        }
-
-        @Override
-        public String require(String key) {
-            return DefaultServerExecutionConfiguration.this.get(prefix(key), getDefault(key));
-        }
-
-        @Override
-        public String get(String key, String defaultValue) {
-            return DefaultServerExecutionConfiguration.this.get(prefix(key));
-        }
-
-        @Override
-        public boolean has(String key) {
-            return DefaultServerExecutionConfiguration.this.has(prefix(key));
-        }
-
-        @Override
-        public Protocol getProtocol() {
-            return protocol;
-        }
-
-        @Override
-        public String getHost() {
-            return require("host");
-        }
-
-        @Override
-        public int getPort() {
-            return Integer.parseInt(require("port"));
-        }
-
-        @Override
-        public DataStore getDataStore() {
-            return dataStore;
-        }
-    }
-
-    private class DefaultDataStoreConfiguration implements DataStoreConfiguration {
-
-        private final String dataStore;
-
-        private DefaultDataStoreConfiguration(String dataStore) {
-            this.dataStore = dataStore;
-        }
-
-        private String prefix(String key) {
-            return "ds-" + dataStore + "-" + key;
-        }
-
-        private String getDefault(String key) {
-            final ScopedOptionRegistry registry = DefaultOptionRegistry.getInstance().getDataStoreOptionRegistry(dataStore);
-            final String defaultValue = registry.getDefaultValue(key, null);
-            if (defaultValue == null) {
-                throw new ConfigurationException("Missing required argument: " + prefix(key));
-            }
-            return defaultValue;
-        }
-
-        @Override
-        public String get(String key) {
-            return DefaultServerExecutionConfiguration.this.get(prefix(key));
-        }
-
-        @Override
-        public String require(String key) {
-            return DefaultServerExecutionConfiguration.this.get(prefix(key), getDefault(key));
-        }
-
-        @Override
-        public String get(String key, String defaultValue) {
-            return DefaultServerExecutionConfiguration.this.get(prefix(key));
-        }
-
-        @Override
-        public boolean has(String key) {
-            return DefaultServerExecutionConfiguration.this.has(prefix(key));
-        }
-
     }
 
 }

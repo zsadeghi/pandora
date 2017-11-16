@@ -17,6 +17,7 @@
         <module>../pandora-cli</module>
         <module>../pandora-rest</module>
         <module>../pandora-kisscli</module>
+        <module>../pandora-dds</module>
     </modules>
 
     <properties>

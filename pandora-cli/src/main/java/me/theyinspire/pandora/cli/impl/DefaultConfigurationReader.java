@@ -3,7 +3,7 @@ package me.theyinspire.pandora.cli.impl;
 import me.theyinspire.pandora.cli.ConfigurationReader;
 import me.theyinspire.pandora.cli.ExecutionConfiguration;
 import me.theyinspire.pandora.cli.ExecutionMode;
-import me.theyinspire.pandora.cli.error.ConfigurationException;
+import me.theyinspire.pandora.core.error.ConfigurationException;
 
 import java.util.HashMap;
 import java.util.Map;

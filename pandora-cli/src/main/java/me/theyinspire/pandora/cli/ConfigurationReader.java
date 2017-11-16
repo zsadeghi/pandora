@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.cli;
 
-import me.theyinspire.pandora.cli.error.ConfigurationException;
+import me.theyinspire.pandora.core.error.ConfigurationException;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

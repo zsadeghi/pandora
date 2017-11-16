@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.cli;
 
-import me.theyinspire.pandora.cli.error.ConfigurationException;
+import me.theyinspire.pandora.core.error.ConfigurationException;
 import me.theyinspire.pandora.cli.impl.DefaultConfigurationReader;
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.error.ClientException;

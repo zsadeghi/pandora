@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.cli.error;
+package me.theyinspire.pandora.core.error;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

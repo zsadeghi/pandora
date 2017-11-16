@@ -20,11 +20,15 @@ public class DefaultOptionRegistry implements OptionRegistry {
     private final Map<String, List<ProtocolOption>> protocolOptions;
     private final Map<String, List<DataStoreOption>> dataStoreOptions;
     private final Map<String, Protocol> protocols;
+    private final Map<String, ProtocolOptionRegistry> protocolOptionRegistries;
+    private final Map<String, DataStoreOptionRegistry> dataStoreOptionRegistries;
 
     private DefaultOptionRegistry() {
         protocolOptions = new HashMap<>();
         protocols = new HashMap<>();
         dataStoreOptions = new HashMap<>();
+        protocolOptionRegistries = new HashMap<>();
+        dataStoreOptionRegistries = new HashMap<>();
     }
 
     @Override
@@ -45,15 +49,25 @@ public class DefaultOptionRegistry implements OptionRegistry {
 
     @Override
     public ScopedOptionRegistry getProtocolOptionRegistry(Protocol protocol) {
+        if (protocolOptionRegistries.containsKey(protocol.getName())) {
+            return protocolOptionRegistries.get(protocol.getName());
+        }
         if (!protocols.containsKey(protocol.getName())) {
             protocols.put(protocol.getName(), protocol);
         }
-        return new ProtocolOptionRegistry(protocol.getName(), protocolOptions);
+        final ProtocolOptionRegistry registry = new ProtocolOptionRegistry(protocol.getName(), protocolOptions);
+        protocolOptionRegistries.put(protocol.getName(), registry);
+        return registry;
     }
 
     @Override
     public ScopedOptionRegistry getDataStoreOptionRegistry(String dataStore) {
-        return new DataStoreOptionRegistry(dataStore, dataStoreOptions);
+        if (dataStoreOptionRegistries.containsKey(dataStore)) {
+            return dataStoreOptionRegistries.get(dataStore);
+        }
+        final DataStoreOptionRegistry registry = new DataStoreOptionRegistry(dataStore, dataStoreOptions);
+        dataStoreOptionRegistries.put(dataStore, registry);
+        return registry;
     }
 
     private static abstract class AbstractScopedOptionRegistry implements ScopedOptionRegistry {
@@ -68,6 +82,13 @@ public class DefaultOptionRegistry implements OptionRegistry {
 
         String getScope() {
             return scope;
+        }
+
+        @Override
+        public List<Option> getOptions() {
+            //noinspection unchecked
+            final List<? extends Option> options = (List<? extends Option>) this.options.get(scope);
+            return Collections.unmodifiableList(options);
         }
 
         @Override
