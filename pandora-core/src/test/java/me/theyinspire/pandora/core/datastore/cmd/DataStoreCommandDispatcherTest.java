@@ -29,7 +29,7 @@ public class DataStoreCommandDispatcherTest {
 
     @Test
     public void testSize() throws Exception {
-        SizeCommand command = Commands.size();
+        SizeCommand command = DataStoreCommands.size();
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.SIZE));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Collections.emptyList())));
@@ -37,7 +37,7 @@ public class DataStoreCommandDispatcherTest {
 
     @Test
     public void testIsEmpty() throws Exception {
-        IsEmptyCommand command = Commands.isEmpty();
+        IsEmptyCommand command = DataStoreCommands.isEmpty();
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.IS_EMPTY));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Collections.emptyList())));
@@ -47,7 +47,7 @@ public class DataStoreCommandDispatcherTest {
     public void testStore() throws Exception {
         final String key = "key";
         final String value = "value";
-        StoreCommand command = Commands.store(key, value);
+        StoreCommand command = DataStoreCommands.store(key, value);
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.STORE));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Arrays.asList(key, value))));
@@ -56,7 +56,7 @@ public class DataStoreCommandDispatcherTest {
     @Test
     public void testGet() throws Exception {
         final String key = "key";
-        GetCommand command = Commands.get(key);
+        GetCommand command = DataStoreCommands.get(key);
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.GET));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Collections.singletonList(key))));
@@ -65,7 +65,7 @@ public class DataStoreCommandDispatcherTest {
     @Test
     public void testDelete() throws Exception {
         final String key = "key";
-        DeleteCommand command = Commands.delete(key);
+        DeleteCommand command = DataStoreCommands.delete(key);
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.DELETE));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Collections.singletonList(key))));
@@ -73,7 +73,7 @@ public class DataStoreCommandDispatcherTest {
 
     @Test
     public void testKeys() throws Exception {
-        KeysCommand command = Commands.keys();
+        KeysCommand command = DataStoreCommands.keys();
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.KEYS));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Collections.emptyList())));
@@ -81,7 +81,7 @@ public class DataStoreCommandDispatcherTest {
 
     @Test
     public void testTruncate() throws Exception {
-        TruncateCommand command = Commands.truncate();
+        TruncateCommand command = DataStoreCommands.truncate();
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.TRUNCATE));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Collections.emptyList())));
@@ -90,7 +90,7 @@ public class DataStoreCommandDispatcherTest {
     @Test
     public void testHas() throws Exception {
         final String key = "key";
-        HasCommand command = Commands.has(key);
+        HasCommand command = DataStoreCommands.has(key);
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.HAS));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Collections.singletonList(key))));
@@ -98,7 +98,7 @@ public class DataStoreCommandDispatcherTest {
 
     @Test
     public void testAll() throws Exception {
-        AllCommand command = Commands.all();
+        AllCommand command = DataStoreCommands.all();
         dispatcher.dispatch(command);
         assertThat(dataStore.getOperations(), contains(DataStoreOperations.ALL));
         assertThat(dataStore.getArguments(), is(Collections.singletonList(Collections.emptyList())));

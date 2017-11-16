@@ -2,12 +2,13 @@ package me.theyinspire.pandora.rmi.client;
 
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.error.ClientException;
-import me.theyinspire.pandora.core.datastore.cmd.CommandDeserializer;
-import me.theyinspire.pandora.core.datastore.cmd.CommandSerializer;
+import me.theyinspire.pandora.core.cmd.Command;
+import me.theyinspire.pandora.core.cmd.CommandDeserializer;
+import me.theyinspire.pandora.core.cmd.CommandSerializer;
+import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
+import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
-import me.theyinspire.pandora.core.datastore.cmd.impl.DefaultCommandDeserializer;
-import me.theyinspire.pandora.core.datastore.cmd.impl.DefaultCommandSerializer;
 import me.theyinspire.pandora.rmi.export.RmiDataStore;
 import me.theyinspire.pandora.rmi.export.RmiDataStoreWrapper;
 
@@ -46,8 +47,8 @@ public class RmiClient implements Client {
             throw new ClientException("Object not bound", e);
         }
         dispatcher = new DataStoreCommandDispatcher(new RmiDataStoreWrapper(dataStore));
-        serializer = new DefaultCommandSerializer();
-        deserializer = new DefaultCommandDeserializer();
+        serializer = AggregateCommandSerializer.getInstance();
+        deserializer = AggregateCommandDeserializer.getInstance();
     }
 
     @Override
@@ -59,8 +60,13 @@ public class RmiClient implements Client {
                 throw new ClientException("Failed to exit the data store", e);
             }
         }
-        final DataStoreCommand<?> command = deserializer.deserializeCommand(content);
-        final Object result = dispatcher.dispatch(command);
+        final Command<?> command = deserializer.deserializeCommand(content);
+        final Object result;
+        if (command instanceof DataStoreCommand<?>) {
+            result = dispatcher.dispatch((DataStoreCommand<?>) command);
+        } else {
+            result = CommandDeserializer.UNKNOWN;
+        }
         return serializer.serializeResponse(command, result);
     }
 

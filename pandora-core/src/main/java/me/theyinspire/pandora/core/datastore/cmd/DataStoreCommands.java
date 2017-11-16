@@ -6,9 +6,9 @@ import java.io.Serializable;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (10/26/17, 6:35 PM)
  */
-public final class Commands {
+public final class DataStoreCommands {
 
-    private Commands() {
+    private DataStoreCommands() {
         throw new UnsupportedOperationException();
     }
 
@@ -148,7 +148,7 @@ public final class Commands {
 
         private final String key;
 
-        public HasCommandImpl(String key) {
+        private HasCommandImpl(String key) {
             this.key = key;
         }
 

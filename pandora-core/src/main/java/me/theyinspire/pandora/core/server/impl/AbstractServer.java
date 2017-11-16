@@ -1,10 +1,13 @@
 package me.theyinspire.pandora.core.server.impl;
 
+import me.theyinspire.pandora.core.cmd.Command;
+import me.theyinspire.pandora.core.cmd.CommandDeserializer;
+import me.theyinspire.pandora.core.cmd.CommandSerializer;
+import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
+import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
-import me.theyinspire.pandora.core.datastore.cmd.impl.DefaultCommandDeserializer;
-import me.theyinspire.pandora.core.datastore.cmd.impl.DefaultCommandSerializer;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.server.*;
 import me.theyinspire.pandora.core.server.error.ServerException;
@@ -22,16 +25,16 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
     public static final int BACKLOG = Runtime.getRuntime().availableProcessors();
     private final ExecutorService executor;
     private final DataStoreCommandDispatcher dispatcher;
-    private final DefaultCommandSerializer serializer;
-    private final DefaultCommandDeserializer deserializer;
+    private final CommandSerializer serializer;
+    private final CommandDeserializer deserializer;
     private boolean running;
 
     public AbstractServer(DataStore dataStore) {
         executor = Executors.newFixedThreadPool(BACKLOG);
         dispatcher = new DataStoreCommandDispatcher(dataStore);
         running = false;
-        serializer = new DefaultCommandSerializer();
-        deserializer = new DefaultCommandDeserializer();
+        serializer = AggregateCommandSerializer.getInstance();
+        deserializer = AggregateCommandDeserializer.getInstance();
     }
 
     @Override
@@ -54,18 +57,20 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
                 stop();
                 continue;
             }
-            final DataStoreCommand<?> command = deserializeCommand(received.getContent());
+            final Command<?> command = deserializeCommand(received.getContent());
             getLog().debug("Scheduling command " + command);
-            executor.submit(() -> {
-                getLog().info("Executing command: " + command);
-                final Object result = dispatcher.dispatch(command);
-                final String serialized = serializeResponse(command, result);
-                O reply = compose(received, serialized);
-                getLog().debug("Responding to the query.");
-                transaction.send(reply);
-                transaction.close();
-                getLog().debug("Transaction closed");
-            });
+            if (command instanceof DataStoreCommand<?>) {
+                executor.submit(() -> {
+                    getLog().info("Executing data store command: " + command);
+                    final Object result = dispatcher.dispatch((DataStoreCommand<?>) command);
+                    final String serialized = serializeResponse(command, result);
+                    O reply = compose(received, serialized);
+                    getLog().debug("Responding to the query.");
+                    transaction.send(reply);
+                    transaction.close();
+                    getLog().debug("Transaction closed");
+                });
+            }
         }
     }
 
@@ -79,11 +84,11 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
         executor.shutdown();
     }
 
-    private DataStoreCommand<?> deserializeCommand(String command) {
+    private Command<?> deserializeCommand(String command) {
         return deserializer.deserializeCommand(command);
     }
 
-    private String serializeResponse(DataStoreCommand<?> command, Object reply) {
+    private String serializeResponse(Command<?> command, Object reply) {
         return serializer.serializeResponse(command, reply);
     }
 

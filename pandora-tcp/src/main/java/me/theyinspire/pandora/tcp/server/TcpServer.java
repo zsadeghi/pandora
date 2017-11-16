@@ -1,7 +1,7 @@
 package me.theyinspire.pandora.tcp.server;
 
 import me.theyinspire.pandora.core.datastore.DataStore;
-import me.theyinspire.pandora.core.datastore.impl.InMemoryDataStore;
+import me.theyinspire.pandora.core.datastore.mem.InMemoryDataStore;
 import me.theyinspire.pandora.core.server.error.ServerException;
 import me.theyinspire.pandora.core.server.impl.AbstractServer;
 import me.theyinspire.pandora.core.server.impl.SimpleIncoming;

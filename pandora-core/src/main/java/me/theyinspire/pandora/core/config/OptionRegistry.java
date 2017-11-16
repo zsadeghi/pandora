@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface OptionRegistry {
 
-    List<Option> getOptions(Protocol protocol);
+    List<ProtocolOption> getProtocolOptions(Protocol protocol);
 
     ProtocolOptionRegistry getProtocolOptionRegistry(Protocol protocol);
 

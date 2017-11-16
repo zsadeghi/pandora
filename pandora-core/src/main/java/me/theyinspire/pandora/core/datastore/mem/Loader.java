@@ -1,7 +1,7 @@
-package me.theyinspire.pandora.core;
+package me.theyinspire.pandora.core.datastore.mem;
 
 import me.theyinspire.pandora.core.datastore.impl.DefaultDataStoreRegistry;
-import me.theyinspire.pandora.core.datastore.impl.InMemoryDataStoreFactory;
+import me.theyinspire.pandora.core.datastore.mem.InMemoryDataStoreFactory;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

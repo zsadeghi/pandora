@@ -1,5 +1,7 @@
 package me.theyinspire.pandora.core.datastore.cmd.impl;
 
+import me.theyinspire.pandora.core.cmd.Command;
+import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.datastore.cmd.*;
 import me.theyinspire.pandora.core.str.DocumentReader;
 import me.theyinspire.pandora.core.str.impl.DefaultDocumentReader;
@@ -10,20 +12,20 @@ import java.util.*;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (10/29/17, 2:12 PM)
  */
-public class DefaultCommandDeserializer implements CommandDeserializer {
+public class DataStoreCommandDeserializer implements CommandDeserializer {
 
-    public static final String SIZE = "size";
-    public static final String EMPTY = "empty";
-    public static final String STORE = "store";
-    public static final String PUT = "put";
-    public static final String GET = "get";
-    public static final String DEL = "del";
-    public static final String KEYS = "keys";
-    public static final String TRUNCATE = "truncate";
-    public static final String HAS = "has";
+    private static final String SIZE = "size";
+    private static final String EMPTY = "empty";
+    private static final String STORE = "store";
+    private static final String PUT = "put";
+    private static final String GET = "get";
+    private static final String DEL = "del";
+    private static final String KEYS = "keys";
+    private static final String TRUNCATE = "truncate";
+    private static final String HAS = "has";
 
     @Override
-    public DataStoreCommand<?> deserializeCommand(String command) {
+    public Command<?> deserializeCommand(String command) {
         if (command == null) {
             return null;
         }
@@ -31,31 +33,30 @@ public class DefaultCommandDeserializer implements CommandDeserializer {
         final String word = reader.expect("\\S+", true).toLowerCase();
         switch (word) {
             case SIZE:
-                return Commands.size();
+                return DataStoreCommands.size();
             case EMPTY:
-                return Commands.isEmpty();
+                return DataStoreCommands.isEmpty();
             case STORE:
-                return Commands.all();
+                return DataStoreCommands.all();
             case KEYS:
-                return Commands.keys();
+                return DataStoreCommands.keys();
             case TRUNCATE:
-                return Commands.truncate();
+                return DataStoreCommands.truncate();
             case HAS:
-                return Commands.has(reader.rest().trim());
+                return DataStoreCommands.has(reader.rest().trim());
             case GET:
-                return Commands.get(reader.rest().trim());
+                return DataStoreCommands.get(reader.rest().trim());
             case DEL:
-                return Commands.delete(reader.rest().trim());
+                return DataStoreCommands.delete(reader.rest().trim());
             case PUT:
                 final String key = reader.expect("\\S+", true).toLowerCase();
-                return Commands.store(key, reader.rest().trim());
-            default:
-                throw new IllegalArgumentException("Invalid command: " + command);
+                return DataStoreCommands.store(key, reader.rest().trim());
         }
+        return null;
     }
 
     @Override
-    public Object deserializeResponse(DataStoreCommand<?> command, String response) {
+    public Object deserializeResponse(Command<?> command, String response) {
         if (command instanceof SizeCommand) {
             return Long.parseLong(response);
         } else if (command instanceof IsEmptyCommand) {
@@ -87,7 +88,7 @@ public class DefaultCommandDeserializer implements CommandDeserializer {
             }
             return map;
         }
-        throw new UnsupportedOperationException("Unknown command: " + command);
+        return UNKNOWN;
     }
 
 }

@@ -5,6 +5,7 @@ import me.theyinspire.pandora.cli.impl.DefaultConfigurationReader;
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.error.ClientException;
 import me.theyinspire.pandora.core.config.Option;
+import me.theyinspire.pandora.core.config.ProtocolOption;
 import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
 import me.theyinspire.pandora.core.datastore.DataStoreRegistry;
 import me.theyinspire.pandora.core.datastore.impl.DefaultDataStoreRegistry;
@@ -65,7 +66,7 @@ public class Launcher {
     }
 
     private static DataStoreRegistry setUpDataStoreRegistry() throws ClassNotFoundException {
-        Class.forName("me.theyinspire.pandora.core.Loader");
+        Class.forName("me.theyinspire.pandora.core.datastore.mem.Loader");
         return DefaultDataStoreRegistry.getInstance();
     }
 
@@ -126,7 +127,7 @@ public class Launcher {
         System.out.println();
         System.out.println("Protocol specific options are:");
         for (Protocol protocol : protocolRegistry.getKnownProtocols()) {
-            final List<Option> options = DefaultOptionRegistry.getInstance().getOptions(protocol);
+            final List<ProtocolOption> options = DefaultOptionRegistry.getInstance().getProtocolOptions(protocol);
             for (Option option : options) {
                 System.out.print("\t");
                 if (option.isOptional()) {

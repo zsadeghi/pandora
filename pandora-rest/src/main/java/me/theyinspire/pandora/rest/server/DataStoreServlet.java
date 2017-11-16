@@ -2,7 +2,7 @@ package me.theyinspire.pandora.rest.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.theyinspire.pandora.core.datastore.DataStore;
-import me.theyinspire.pandora.core.datastore.cmd.Commands;
+import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
 import me.theyinspire.pandora.core.server.error.ServerException;
@@ -98,30 +98,30 @@ public class DataStoreServlet extends HttpServlet {
         switch (method) {
             case GET:
                 if (url.matches("/keys/size/?")) {
-                    return Commands.size();
+                    return DataStoreCommands.size();
                 } else if (url.matches("/keys/?")) {
-                    return Commands.keys();
+                    return DataStoreCommands.keys();
                 } else if (url.startsWith("/data/")) {
-                    return Commands.get(key(url));
+                    return DataStoreCommands.get(key(url));
                 } else if (url.matches("/data/?")) {
-                    return Commands.all();
+                    return DataStoreCommands.all();
                 }
                 break;
             case HEAD:
                 if (url.startsWith("/data/")) {
-                    return Commands.has(key(url));
+                    return DataStoreCommands.has(key(url));
                 }
                 break;
             case PUT:
                 if (url.startsWith("/data/")) {
-                    return Commands.store(key(url), value(request));
+                    return DataStoreCommands.store(key(url), value(request));
                 }
                 break;
             case DELETE:
                 if (url.startsWith("/data/")) {
-                    return Commands.delete(key(url));
+                    return DataStoreCommands.delete(key(url));
                 } else if (url.matches("/data/?")) {
-                    return Commands.truncate();
+                    return DataStoreCommands.truncate();
                 }
                 break;
         }

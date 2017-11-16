@@ -1,8 +1,12 @@
 package me.theyinspire.pandora.core.datastore.cmd.impl;
 
+import me.theyinspire.pandora.core.cmd.Command;
+import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.datastore.cmd.*;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,10 +14,15 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (10/29/17, 1:44 PM)
  */
-public class DefaultCommandSerializer implements CommandSerializer {
+public class DataStoreCommandSerializer implements CommandSerializer {
 
     @Override
-    public String serializeCommand(DataStoreCommand<?> command) {
+    public List<Class<? extends Command>> accepts() {
+        return Collections.singletonList(DataStoreCommand.class);
+    }
+
+    @Override
+    public String serializeCommand(Command<?> command) {
         if (command instanceof SizeCommand) {
             return "size";
         } else if (command instanceof IsEmptyCommand) {
@@ -33,11 +42,11 @@ public class DefaultCommandSerializer implements CommandSerializer {
         } else if (command instanceof AllCommand) {
             return "store";
         }
-        throw new UnsupportedOperationException("Unknown command: " + command);
+        return null;
     }
 
     @Override
-    public String serializeResponse(DataStoreCommand<?> command, Object response) {
+    public String serializeResponse(Command<?> command, Object response) {
         final String serialized;
         if (command instanceof SizeCommand) {
             serialized = String.valueOf(response);

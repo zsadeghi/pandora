@@ -2,6 +2,7 @@ package me.theyinspire.pandora.core.config.impl;
 
 import me.theyinspire.pandora.core.config.Option;
 import me.theyinspire.pandora.core.config.OptionRegistry;
+import me.theyinspire.pandora.core.config.ProtocolOption;
 import me.theyinspire.pandora.core.config.ProtocolOptionRegistry;
 import me.theyinspire.pandora.core.protocol.Protocol;
 
@@ -19,15 +20,15 @@ public class DefaultOptionRegistry implements OptionRegistry {
         return INSTANCE;
     }
 
-    private final Map<String, List<Option>> options;
+    private final Map<String, List<ProtocolOption>> protocolOptions;
 
     private DefaultOptionRegistry() {
-        options = new HashMap<>();
+        protocolOptions = new HashMap<>();
     }
 
     @Override
-    public List<Option> getOptions(Protocol protocol) {
-        return Collections.unmodifiableList(options.get(protocol.getName()));
+    public List<ProtocolOption> getProtocolOptions(Protocol protocol) {
+        return Collections.unmodifiableList(protocolOptions.get(protocol.getName()));
     }
 
     @Override
@@ -45,14 +46,14 @@ public class DefaultOptionRegistry implements OptionRegistry {
 
         @Override
         public void register(String name, String description, String defaultValue) {
-            final List<Option> list;
-            if (options.containsKey(protocol.getName())) {
-                list = DefaultOptionRegistry.this.options.get(protocol.getName());
+            final List<ProtocolOption> list;
+            if (protocolOptions.containsKey(protocol.getName())) {
+                list = DefaultOptionRegistry.this.protocolOptions.get(protocol.getName());
             } else {
                 list = new ArrayList<>();
             }
-            list.add(new ImmutableOption(name, description, defaultValue, protocol));
-            options.put(protocol.getName(), list);
+            list.add(new ImmutableProtocolOption(name, description, defaultValue, protocol));
+            protocolOptions.put(protocol.getName(), list);
         }
 
         @Override
@@ -62,10 +63,10 @@ public class DefaultOptionRegistry implements OptionRegistry {
 
         @Override
         public String getDefaultValue(String name, String fallback) {
-            if (!options.containsKey(protocol.getName())) {
+            if (!protocolOptions.containsKey(protocol.getName())) {
                 return fallback;
             }
-            return options.get(protocol.getName()).stream()
+            return protocolOptions.get(protocol.getName()).stream()
                     .filter(option -> option.getName().equals(name))
                     .map(Option::getDefaultValue)
                     .findFirst()

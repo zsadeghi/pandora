@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.core.datastore.impl;
+package me.theyinspire.pandora.core.datastore.mem;
 
 import me.theyinspire.pandora.core.datastore.DataStore;
 
