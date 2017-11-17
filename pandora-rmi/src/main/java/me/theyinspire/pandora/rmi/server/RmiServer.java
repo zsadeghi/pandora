@@ -89,6 +89,7 @@ public class RmiServer implements Server {
         } catch (NotBoundException e) {
             throw new ServerException("Data store is not bound", e);
         }
+        onAfterStop();
     }
 
 }

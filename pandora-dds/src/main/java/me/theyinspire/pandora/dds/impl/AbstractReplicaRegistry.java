@@ -27,7 +27,7 @@ public abstract class AbstractReplicaRegistry implements ReplicaRegistry {
 
 
     @Override
-    public final void notify(String signature, String uri, DistributedDataStore dataStore) {
+    public final void init(String signature, String uri, DistributedDataStore dataStore) {
         onBeforeDataSync(signature, uri, dataStore);
         final Set<Replica> replicaSet = getReplicaSet(dataStore);
         for (Replica replica : replicaSet) {

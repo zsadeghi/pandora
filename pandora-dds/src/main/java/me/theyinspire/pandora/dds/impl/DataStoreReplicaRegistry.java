@@ -56,4 +56,10 @@ public class DataStoreReplicaRegistry extends AbstractReplicaRegistry {
         client.send(serializer.serializeCommand(DataStoreCommands.store(signature, uri)));
     }
 
+    @Override
+    public void destroy(String signature, String uri, DistributedDataStore dataStore) {
+        // This will remove this node as an available replica once the server has shutdown
+        client.send(serializer.serializeCommand(DataStoreCommands.delete(signature)));
+    }
+
 }

@@ -6,6 +6,9 @@ import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (11/16/17, 2:35 PM)
@@ -14,11 +17,13 @@ public class DefaultServerConfiguration extends AbstractScopedConfiguration impl
 
     private final Protocol protocol;
     private DataStore dataStore;
+    private final List<Runnable> shutdownHooks;
 
-    public DefaultServerConfiguration(Configuration delegate, Protocol protocol, DataStore dataStore) {
+    public DefaultServerConfiguration(Configuration delegate, Protocol protocol, DataStore dataStore, List<Runnable> shutdownHooks) {
         super(delegate);
         this.protocol = protocol;
         this.dataStore = dataStore;
+        this.shutdownHooks = shutdownHooks;
     }
 
     protected String prefix(String key) {
@@ -48,6 +53,11 @@ public class DefaultServerConfiguration extends AbstractScopedConfiguration impl
     @Override
     public DataStore getDataStore() {
         return dataStore;
+    }
+
+    @Override
+    public List<Runnable> getShutdownHooks() {
+        return Collections.unmodifiableList(shutdownHooks);
     }
 
 }

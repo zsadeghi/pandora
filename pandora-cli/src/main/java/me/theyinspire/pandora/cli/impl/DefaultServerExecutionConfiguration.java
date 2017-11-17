@@ -4,10 +4,7 @@ import me.theyinspire.pandora.core.config.ExecutionMode;
 import me.theyinspire.pandora.core.config.ServerExecutionConfiguration;
 import me.theyinspire.pandora.core.config.impl.DefaultDataStoreConfiguration;
 import me.theyinspire.pandora.core.config.impl.DefaultServerConfiguration;
-import me.theyinspire.pandora.core.datastore.DataStore;
-import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
-import me.theyinspire.pandora.core.datastore.DataStoreRegistry;
-import me.theyinspire.pandora.core.datastore.InitializingDataStore;
+import me.theyinspire.pandora.core.datastore.*;
 import me.theyinspire.pandora.core.datastore.impl.DefaultDataStoreRegistry;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.ProtocolRegistry;
@@ -35,13 +32,21 @@ public class DefaultServerExecutionConfiguration extends AbstractExecutionConfig
         this.dataStoreName = deduceDataStoreName();
         dataStoreConfiguration = new DefaultDataStoreConfiguration(this, dataStoreName);
         this.dataStore = deduceDataStore();
+        final Map<String, List<Runnable>> shutdownHooks = new HashMap<>();
         for (Protocol protocol : protocols) {
-            configurations.put(protocol, new DefaultServerConfiguration(this, protocol, dataStore));
+            shutdownHooks.put(protocol.getName(), new ArrayList<>());
+            configurations.put(protocol, new DefaultServerConfiguration(this, protocol, dataStore, shutdownHooks.get(protocol.getName())));
         }
         if (dataStore instanceof InitializingDataStore) {
             InitializingDataStore store = (InitializingDataStore) dataStore;
             for (ServerConfiguration configuration : configurations.values()) {
                 store.init(configuration, dataStoreConfiguration);
+            }
+        }
+        if (dataStore instanceof DestroyableDataStore) {
+            DestroyableDataStore store = (DestroyableDataStore) dataStore;
+            for (Protocol protocol : protocols) {
+                shutdownHooks.get(protocol.getName()).add(() -> ((DestroyableDataStore) dataStore).destroy(getServerConfiguration(protocol)));
             }
         }
     }

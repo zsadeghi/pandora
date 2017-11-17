@@ -89,6 +89,7 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
         getLog().info("Shutting down the server.");
         running = false;
         executor.shutdown();
+        onAfterStop();
     }
 
     private Command<?> deserializeCommand(String command) {

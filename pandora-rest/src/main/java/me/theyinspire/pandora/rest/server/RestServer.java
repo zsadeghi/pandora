@@ -86,6 +86,7 @@ public class RestServer implements me.theyinspire.pandora.core.server.Server {
             LOG.info("Initiating shutdown sequence ...");
             serverThread.interrupt();
             server.stop();
+            onAfterStop();
         } catch (Exception e) {
             throw new ServerException("Failed to stop the server", e);
         }

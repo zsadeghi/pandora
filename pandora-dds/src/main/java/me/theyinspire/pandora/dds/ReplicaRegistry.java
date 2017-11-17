@@ -13,6 +13,8 @@ public interface ReplicaRegistry {
 
     Set<Replica> getReplicaSet(LockingDataStore dataStore);
 
-    default void notify(String signature, String uri, DistributedDataStore dataStore) {}
+    default void init(String signature, String uri, DistributedDataStore dataStore) {}
+
+    default void destroy(String signature, String uri, DistributedDataStore dataStore) {}
 
 }

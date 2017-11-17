@@ -1,6 +1,7 @@
 package me.theyinspire.pandora.dds.impl;
 
 import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
+import me.theyinspire.pandora.core.datastore.DestroyableDataStore;
 import me.theyinspire.pandora.core.datastore.InitializingDataStore;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.datastore.cmd.*;
@@ -20,7 +21,7 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (11/16/17, 5:58 PM)
  */
-public class DistributedDataStore implements LockingDataStore, InitializingDataStore {
+public class DistributedDataStore implements LockingDataStore, InitializingDataStore, DestroyableDataStore {
 
     private final LockingDataStore delegate;
     private final ReplicaRegistry replicaRegistry;
@@ -201,7 +202,12 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
 
     @Override
     public void init(ServerConfiguration serverConfiguration, DataStoreConfiguration dataStoreConfiguration) {
-        replicaRegistry.notify(getSignature(), serverConfigurationWriter.write(serverConfiguration), this);
+        replicaRegistry.init(getSignature(), serverConfigurationWriter.write(serverConfiguration), this);
+    }
+
+    @Override
+    public void destroy(ServerConfiguration serverConfiguration) {
+        replicaRegistry.destroy(getSignature(), serverConfigurationWriter.write(serverConfiguration), this);
     }
 
 }
