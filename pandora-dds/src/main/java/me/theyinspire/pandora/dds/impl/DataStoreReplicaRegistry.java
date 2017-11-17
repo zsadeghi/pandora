@@ -52,7 +52,7 @@ public class DataStoreReplicaRegistry extends AbstractReplicaRegistry {
     }
 
     @Override
-    public void notify(String signature, String uri) {
+    protected void onBeforeDataSync(String signature, String uri, DistributedDataStore dataStore) {
         client.send(serializer.serializeCommand(DataStoreCommands.store(signature, uri)));
     }
 

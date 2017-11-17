@@ -1,6 +1,7 @@
 package me.theyinspire.pandora.dds;
 
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
+import me.theyinspire.pandora.dds.impl.DistributedDataStore;
 
 import java.util.Set;
 
@@ -12,6 +13,6 @@ public interface ReplicaRegistry {
 
     Set<Replica> getReplicaSet(LockingDataStore dataStore);
 
-    default void notify(String signature, String uri) {}
+    default void notify(String signature, String uri, DistributedDataStore dataStore) {}
 
 }

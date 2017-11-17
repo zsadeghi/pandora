@@ -1,9 +1,12 @@
 package me.theyinspire.pandora.dds.impl;
 
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
+import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
 import me.theyinspire.pandora.dds.Replica;
 import me.theyinspire.pandora.dds.ReplicaRegistry;
 
+import java.io.Serializable;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +23,30 @@ public abstract class AbstractReplicaRegistry implements ReplicaRegistry {
         return getReplicaSet().stream()
                 .filter(replica -> !replica.getSignature().equals(dataStore.getSignature()))
                 .collect(Collectors.toSet());
+    }
+
+
+    @Override
+    public final void notify(String signature, String uri, DistributedDataStore dataStore) {
+        onBeforeDataSync(signature, uri, dataStore);
+        final Set<Replica> replicaSet = getReplicaSet(dataStore);
+        for (Replica replica : replicaSet) {
+            final Map<String, Serializable> values = replica.send(DataStoreCommands.all());
+            for (Map.Entry<String, Serializable> entry : values.entrySet()) {
+                dataStore.lock(entry.getKey());
+                dataStore.store(entry.getKey(), entry.getValue());
+                dataStore.unlock(entry.getKey());
+            }
+        }
+        onAfterDataSync(signature, uri, dataStore);
+    }
+
+    protected void onBeforeDataSync(String signature, String uri, DistributedDataStore dataStore) {
+
+    }
+
+    protected void onAfterDataSync(String signature, String uri, DistributedDataStore dataStore) {
+
     }
 
 }

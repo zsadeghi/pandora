@@ -43,9 +43,7 @@ public class Launcher {
                 final List<Thread> serverThreads = servers.stream()
                         .map(server -> new Thread(server::start))
                         .collect(Collectors.toList());
-                servers.forEach((server) -> {
-                    Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
-                });
+                servers.forEach((server) -> Runtime.getRuntime().addShutdownHook(new Thread(server::stop)));
                 serverThreads.forEach(Thread::start);
                 for (Thread serverThread : serverThreads) {
                     serverThread.join();

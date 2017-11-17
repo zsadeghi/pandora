@@ -201,7 +201,7 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
 
     @Override
     public void init(ServerConfiguration serverConfiguration, DataStoreConfiguration dataStoreConfiguration) {
-        replicaRegistry.notify(getSignature(), serverConfigurationWriter.write(serverConfiguration));
+        replicaRegistry.notify(getSignature(), serverConfigurationWriter.write(serverConfiguration), this);
     }
 
 }
