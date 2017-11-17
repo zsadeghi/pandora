@@ -60,3 +60,34 @@ using telnet to communicate, to list all data you will have to send `^<<store^>>
 in the same way.
 
 This is to allow for multiline communication, or communication not punctuated by the newline feed character.
+
+## Replication
+
+To replicate your data with this application, set the data store to `dds`:
+
+    /path/to/launcher --data-store=dds
+
+which will internally use the in-memory data store by default, and use beacon transmission for automatic replica discovery
+over the local network.
+
+The underlying data store must support locking and reverting.
+
+### Replica Discovery
+
+Replica discovery can be achieved in one of the following three ways:
+
+1. Reading the list of potential replicas from a static file (which can optionally be refreshed periodically). This
+method will treat the list of replicas as potential nodes, and syncs to them when they go online. The format of the
+file dictates one replica per line, and each replica will have a URI: `schema://host:port/?options=...`; for instance
+a REST replica located at `192.168.1.70` listening to port `9091` and with a context path `store` will be addressed
+as `rest://192.168.1.70:9091/?base=store`. After a node goes online, it will automatically sync to the latest data
+from other nodes.
+
+2. Using a third-party node (running on any of the supported protocols) as a registry for nodes. Each node will register
+itself as it goes online, and unregisters itself as it goes offline. Auto-sync is also supported.
+
+3. Using a beacon, every node starts transmitting its specification every 5 seconds, and maintains a list of other nodes
+on the network internally. This is done via UDP. Your router must allow broadcasts on UDP, and all nodes must agree on
+the beacon port. This can also be used to maintain different sets of replicated data nodes which are unaware of each
+other's pool, since their beacon port is different. Nodes will also let each other know if they are being gracefully
+shut down.
