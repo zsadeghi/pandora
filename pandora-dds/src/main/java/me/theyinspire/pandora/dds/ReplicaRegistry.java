@@ -12,4 +12,6 @@ public interface ReplicaRegistry {
 
     Set<Replica> getReplicaSet(LockingDataStore dataStore);
 
+    default void notify(String signature, String uri) {}
+
 }

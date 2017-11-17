@@ -17,6 +17,6 @@ public interface CommandDeserializer {
 
     Command<?> deserializeCommand(String command, ServerConfiguration serverConfiguration);
 
-    Object deserializeResponse(Command<?> command, String response);
+    <R> R deserializeResponse(Command<R> command, String response);
 
 }

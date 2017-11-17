@@ -1,12 +1,13 @@
 package me.theyinspire.pandora.cli.impl;
 
-import me.theyinspire.pandora.cli.ExecutionMode;
-import me.theyinspire.pandora.cli.ServerExecutionConfiguration;
+import me.theyinspire.pandora.core.config.ExecutionMode;
+import me.theyinspire.pandora.core.config.ServerExecutionConfiguration;
 import me.theyinspire.pandora.core.config.impl.DefaultDataStoreConfiguration;
 import me.theyinspire.pandora.core.config.impl.DefaultServerConfiguration;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
 import me.theyinspire.pandora.core.datastore.DataStoreRegistry;
+import me.theyinspire.pandora.core.datastore.InitializingDataStore;
 import me.theyinspire.pandora.core.datastore.impl.DefaultDataStoreRegistry;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.ProtocolRegistry;
@@ -29,13 +30,19 @@ public class DefaultServerExecutionConfiguration extends AbstractExecutionConfig
 
     public DefaultServerExecutionConfiguration(Map<String, String> data) {
         super(ExecutionMode.SERVER, data);
+        configurations = new HashMap<>();
         this.protocols = Collections.unmodifiableList(deduceProtocols());
         this.dataStoreName = deduceDataStoreName();
         dataStoreConfiguration = new DefaultDataStoreConfiguration(this, dataStoreName);
         this.dataStore = deduceDataStore();
-        configurations = new HashMap<>();
         for (Protocol protocol : protocols) {
             configurations.put(protocol, new DefaultServerConfiguration(this, protocol, dataStore));
+        }
+        if (dataStore instanceof InitializingDataStore) {
+            InitializingDataStore store = (InitializingDataStore) dataStore;
+            for (ServerConfiguration configuration : configurations.values()) {
+                store.init(configuration, dataStoreConfiguration);
+            }
         }
     }
 

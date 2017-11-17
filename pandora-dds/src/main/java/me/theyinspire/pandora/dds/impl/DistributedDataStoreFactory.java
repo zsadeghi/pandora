@@ -1,7 +1,7 @@
 package me.theyinspire.pandora.dds.impl;
 
-import me.theyinspire.pandora.core.config.Configuration;
 import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
+import me.theyinspire.pandora.core.config.ServerExecutionConfiguration;
 import me.theyinspire.pandora.core.config.impl.DefaultDataStoreConfiguration;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
@@ -30,14 +30,15 @@ public class DistributedDataStoreFactory implements DataStoreFactory {
     @Override
     public DataStore getDataStore(DataStoreConfiguration configuration) {
         final String delegateName = configuration.require("delegate");
-        final Configuration executionConfig = configuration.getConfiguration();
+        final ServerExecutionConfiguration executionConfig = (ServerExecutionConfiguration) configuration.getConfiguration();
         final DataStoreConfiguration delegateConfig = new DefaultDataStoreConfiguration(executionConfig, delegateName);
         final DataStore delegate = DefaultDataStoreRegistry.getInstance().get(delegateName, delegateConfig);
         if (!(delegate instanceof LockingDataStore)) {
             throw new ConfigurationException("Data store type <" + delegateName + ">  is not capable of handling locking operations");
         }
+        final LockingDataStore lockingDataStore = (LockingDataStore) delegate;
         final ReplicaRegistry replicaRegistry = getReplicaRegistry(configuration);
-        return new DistributedDataStore((LockingDataStore) delegate, replicaRegistry);
+        return new DistributedDataStore(lockingDataStore, replicaRegistry);
     }
 
     private ReplicaRegistry getReplicaRegistry(DataStoreConfiguration configuration) {
@@ -51,7 +52,7 @@ public class DistributedDataStoreFactory implements DataStoreFactory {
                 replicaRegistry = null;
                 break;
             case REGISTRY:
-                replicaRegistry = null;
+                replicaRegistry = new DataStoreReplicaRegistry(configuration.require("registry-uri"));
                 break;
             default:
                 throw new ConfigurationException("Unknown replica registry type");
@@ -69,7 +70,7 @@ public class DistributedDataStoreFactory implements DataStoreFactory {
         optionRegistry.register("delegate", "The type of the underlying data store to use", "memory");
         optionRegistry.register("replica-file", "The name of the file containing replica URIs. Required if you set discovery to `file`.");
         optionRegistry.register("beacon", "The beacon port for UDP replica registry", "10101");
-        optionRegistry.register("registry-uri", "The URI for the registry containing replica information", "Required if you set discovery to `registry`.");
+        optionRegistry.register("registry-uri", "The URI for the registry containing replica information. Required if you set discovery to `registry`.");
         optionRegistry.register("discovery", "The mode of discovery, can be one of " + discoveryModes, ReplicaDiscoveryMode.ANNOUNCE.name().toLowerCase());
     }
 

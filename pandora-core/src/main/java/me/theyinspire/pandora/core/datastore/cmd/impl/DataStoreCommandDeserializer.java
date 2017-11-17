@@ -74,28 +74,29 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Object deserializeResponse(Command<?> command, String response) {
+    public <R> R deserializeResponse(Command<R> command, String response) {
         if (command instanceof SizeCommand) {
-            return Long.parseLong(response);
+            return (R) (Long) Long.parseLong(response);
         } else if (command instanceof IsEmptyCommand) {
-            return Boolean.parseBoolean(response);
+            return (R) (Boolean) Boolean.parseBoolean(response);
         } else if (command instanceof StoreCommand) {
-            return response.startsWith("put");
+            return (R) (Boolean) response.startsWith("put");
         } else if (command instanceof GetCommand) {
             if (!response.matches("get key=.*? val=.*?")) {
                 throw new IllegalArgumentException("Poorly formatted response: " + response);
             }
             response = response.substring(response.indexOf("val=") + 4);
-            return response;
+            return (R) response;
         } else if (command instanceof DeleteCommand) {
-            return response.startsWith("delete");
+            return (R) (Boolean) response.startsWith("delete");
         } else if (command instanceof KeysCommand) {
-            return response.isEmpty() ? Collections.emptySet() : new HashSet<>(Arrays.asList(response.split(",")));
+            return response.isEmpty() ? (R) Collections.emptySet() : (R) new HashSet<>(Arrays.asList(response.split(",")));
         } else if (command instanceof TruncateCommand) {
-            return Long.parseLong(response);
+            return (R) (Long) Long.parseLong(response);
         } else if (command instanceof HasCommand) {
-            return Boolean.parseBoolean(response);
+            return (R) (Boolean) Boolean.parseBoolean(response);
         } else if (command instanceof AllCommand) {
             final Map<String, Object> map = new HashMap<>();
             final String[] lines = response.split("\n");
@@ -105,19 +106,19 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 final String[] portions = line.split(":value:");
                 map.put(portions[0], portions[1]);
             }
-            return map;
+            return (R) map;
         } else if (command instanceof LockingDataStoreCommand<?>) {
             if (command instanceof GetUriCommand) {
-                return response;
+                return (R) response;
             } else if (command instanceof SignatureCommand) {
-                return response;
+                return (R) response;
             } else if (command instanceof IsLockedCommand) {
-                return Boolean.parseBoolean(response);
+                return (R) (Boolean) Boolean.parseBoolean(response);
             } else {
                 return null;
             }
         }
-        return UNKNOWN;
+        return (R) UNKNOWN;
     }
 
 }

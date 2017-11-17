@@ -1,7 +1,7 @@
 package me.theyinspire.pandora.cli.impl;
 
-import me.theyinspire.pandora.cli.ClientExecutionConfiguration;
-import me.theyinspire.pandora.cli.ExecutionMode;
+import me.theyinspire.pandora.core.config.ClientExecutionConfiguration;
+import me.theyinspire.pandora.core.config.ExecutionMode;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.config.impl.DefaultClientConfiguration;
 import me.theyinspire.pandora.core.error.ConfigurationException;

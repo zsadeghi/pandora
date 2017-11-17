@@ -1,7 +1,7 @@
 package me.theyinspire.pandora.cli.impl;
 
-import me.theyinspire.pandora.cli.ExecutionConfiguration;
-import me.theyinspire.pandora.cli.ExecutionMode;
+import me.theyinspire.pandora.core.config.ExecutionConfiguration;
+import me.theyinspire.pandora.core.config.ExecutionMode;
 import me.theyinspire.pandora.core.config.impl.AbstractConfiguration;
 
 import java.util.Map;

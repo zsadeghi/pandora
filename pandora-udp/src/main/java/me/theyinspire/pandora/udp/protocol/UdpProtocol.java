@@ -25,7 +25,7 @@ public class UdpProtocol implements Protocol {
 
     @Override
     public void defineOptions(ScopedOptionRegistry registry) {
-        registry.register("host", "The host name", "0.0.0.0");
+        registry.register("host", "The host name", "127.0.0.1");
         registry.register("port", "The communication port", "8082");
     }
 

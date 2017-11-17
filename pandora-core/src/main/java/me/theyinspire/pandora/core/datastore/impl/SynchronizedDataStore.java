@@ -1,6 +1,8 @@
 package me.theyinspire.pandora.core.datastore.impl;
 
 import me.theyinspire.pandora.core.datastore.DataStore;
+import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
+import me.theyinspire.pandora.core.datastore.InitializingDataStore;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 
@@ -12,7 +14,7 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (10/26/17, 6:25 PM)
  */
-public class SynchronizedDataStore implements LockingDataStore {
+public class SynchronizedDataStore implements LockingDataStore, InitializingDataStore {
 
     private final DataStore delegate;
 
@@ -105,6 +107,18 @@ public class SynchronizedDataStore implements LockingDataStore {
             return ((LockingDataStore) delegate).getSignature();
         }
         return null;
+    }
+
+    public DataStore getDelegate() {
+        return delegate;
+    }
+
+    @Override
+    public void init(ServerConfiguration serverConfiguration, DataStoreConfiguration dataStoreConfiguration) {
+        if (delegate instanceof InitializingDataStore) {
+            InitializingDataStore dataStore = (InitializingDataStore) delegate;
+            dataStore.init(serverConfiguration, dataStoreConfiguration);
+        }
     }
 
 }

@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.cli;
+package me.theyinspire.pandora.core.config;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

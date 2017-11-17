@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.cli;
+package me.theyinspire.pandora.core.config;
 
 import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.protocol.Protocol;

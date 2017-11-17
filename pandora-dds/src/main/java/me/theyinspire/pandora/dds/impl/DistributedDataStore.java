@@ -1,9 +1,13 @@
 package me.theyinspire.pandora.dds.impl;
 
+import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
+import me.theyinspire.pandora.core.datastore.InitializingDataStore;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.datastore.cmd.*;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
+import me.theyinspire.pandora.core.server.UriServerConfigurationWriter;
 import me.theyinspire.pandora.core.server.error.ServerException;
+import me.theyinspire.pandora.core.server.impl.DefaultUriServerConfigurationWriter;
 import me.theyinspire.pandora.dds.Replica;
 import me.theyinspire.pandora.dds.ReplicaRegistry;
 
@@ -16,12 +20,14 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (11/16/17, 5:58 PM)
  */
-public class DistributedDataStore implements LockingDataStore {
+public class DistributedDataStore implements LockingDataStore, InitializingDataStore {
 
     private final LockingDataStore delegate;
     private final ReplicaRegistry replicaRegistry;
+    private final UriServerConfigurationWriter serverConfigurationWriter;
 
     public DistributedDataStore(LockingDataStore delegate, ReplicaRegistry replicaRegistry) {
+        serverConfigurationWriter = new DefaultUriServerConfigurationWriter();
         this.delegate = delegate;
         this.replicaRegistry = replicaRegistry;
     }
@@ -191,6 +197,11 @@ public class DistributedDataStore implements LockingDataStore {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void init(ServerConfiguration serverConfiguration, DataStoreConfiguration dataStoreConfiguration) {
+        replicaRegistry.notify(getSignature(), serverConfigurationWriter.write(serverConfiguration));
     }
 
 }

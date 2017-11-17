@@ -38,9 +38,9 @@ public class AggregateCommandDeserializer implements CommandDeserializer {
     }
 
     @Override
-    public Object deserializeResponse(Command<?> command, String response) {
+    public <R> R deserializeResponse(Command<R> command, String response) {
         for (CommandDeserializer deserializer : deserializers) {
-            final Object deserializedResponse = deserializer.deserializeResponse(command, response);
+            final R deserializedResponse = deserializer.deserializeResponse(command, response);
             if (deserializedResponse != UNKNOWN) {
                 return deserializedResponse;
             }

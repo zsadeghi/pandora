@@ -1,6 +1,4 @@
-package me.theyinspire.pandora.cli;
-
-import me.theyinspire.pandora.core.config.Configuration;
+package me.theyinspire.pandora.core.config;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
