@@ -36,7 +36,11 @@ public abstract class AbstractScopedConfiguration implements Configuration {
 
     @Override
     public String require(String key) {
-        return delegate.get(prefix(key), getDefault(key));
+        final String value = delegate.get(prefix(key), null);
+        if (value == null) {
+            return getDefault(key);
+        }
+        return value;
     }
 
     @Override

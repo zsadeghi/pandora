@@ -2,6 +2,7 @@ package me.theyinspire.pandora.dds.impl;
 
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
+import me.theyinspire.pandora.core.client.error.ClientException;
 import me.theyinspire.pandora.core.client.impl.DefaultUriClientConfigurationReader;
 import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
@@ -14,6 +15,7 @@ import me.theyinspire.pandora.core.server.error.ServerException;
 import me.theyinspire.pandora.dds.Replica;
 
 import java.io.*;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -23,12 +25,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
 
-    private Set<Replica> replicaSet;
+    private final Set<Client> clients;
+    private final CommandSerializer serializer;
+    private final CommandDeserializer deserializer;
 
     public ConfigurationFileReplicaRegistry(File file) {
-        replicaSet = new CopyOnWriteArraySet<>();
-        final CommandSerializer serializer = AggregateCommandSerializer.getInstance();
-        final CommandDeserializer deserializer = AggregateCommandDeserializer.getInstance();
+        serializer = AggregateCommandSerializer.getInstance();
+        deserializer = AggregateCommandDeserializer.getInstance();
         final BufferedReader reader;
         final DefaultUriClientConfigurationReader configurationReader = new DefaultUriClientConfigurationReader();
         try {
@@ -36,6 +39,7 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
         } catch (FileNotFoundException e) {
             throw new ServerException("Failed to read configuration file", e);
         }
+        clients = new HashSet<>();
         while (true) {
             final String line;
             try {
@@ -48,15 +52,25 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
             }
             final ClientConfiguration clientConfiguration = configurationReader.read(line);
             final Client client = DefaultProtocolRegistry.getInstance().getClient(clientConfiguration.getProtocol(), clientConfiguration);
-            final SignatureCommand signatureCommand = LockingDataStoreCommands.signature();
-            final String result = client.send(serializer.serializeCommand(signatureCommand));
-            final String signature = (String) deserializer.deserializeResponse(signatureCommand, result);
-            replicaSet.add(new ImmutableReplica(signature, client));
+            clients.add(client);
         }
     }
 
     @Override
     protected Set<Replica> getReplicaSet() {
+        final SignatureCommand signatureCommand = LockingDataStoreCommands.signature();
+        final Set<Replica> replicaSet = new HashSet<>();
+        for (Client client : clients) {
+            final String serializedCommand = serializer.serializeCommand(signatureCommand);
+            final String result;
+            try {
+                result = client.send(serializedCommand);
+            } catch (ClientException e) {
+                continue;
+            }
+            final String signature = (String) deserializer.deserializeResponse(signatureCommand, result);
+            replicaSet.add(new ImmutableReplica(signature, client));
+        }
         return replicaSet;
     }
 

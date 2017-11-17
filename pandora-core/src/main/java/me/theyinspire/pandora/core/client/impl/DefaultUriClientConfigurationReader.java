@@ -30,7 +30,7 @@ public class DefaultUriClientConfigurationReader implements UriClientConfigurati
         final String protocolName = context.getScheme();
         final String host = context.getHost();
         final String port = String.valueOf(context.getPort());
-        final String[] settings = context.getQuery().split("&");
+        final String[] settings = context.getQuery() == null ? new String[0] : context.getQuery().split("&");
         final Map<String, String> data = new HashMap<>();
         data.put(option(protocolName, "host"), host);
         data.put(option(protocolName, "port"), port);

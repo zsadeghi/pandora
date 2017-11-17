@@ -59,6 +59,7 @@ public class Launcher {
         } catch (ConfigurationException configurationException) {
             if (args.length > 1) {
                 printError(configurationException);
+                System.out.println();
             }
             printUsage(protocolRegistry, dataStoreRegistry);
         } catch (ClientException | ServerException e) {
@@ -147,6 +148,7 @@ public class Launcher {
         System.out.println("For example:");
         System.out.println("-Dpandora.protocols=my.protocol.package.Loader /path/to/launcher");
         System.out.println("These classes will be loaded in addition to the already supported classes.");
+        System.out.flush();
     }
 
     private static void printDataStoreOptions(DataStoreRegistry dataStoreRegistry) {
@@ -193,10 +195,10 @@ public class Launcher {
     }
 
     private static void printError(Throwable exception) {
-        System.err.println(exception.getMessage());
-        System.err.flush();
+        System.out.println(exception.getMessage());
+        System.out.flush();
         if (exception.getCause() != null) {
-            System.err.print("Caused by: ");
+            System.out.print("Caused by: ");
             printError(exception.getCause());
         }
     }

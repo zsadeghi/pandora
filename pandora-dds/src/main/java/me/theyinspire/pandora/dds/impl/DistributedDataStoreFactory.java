@@ -67,9 +67,9 @@ public class DistributedDataStoreFactory implements DataStoreFactory {
                 .sorted()
                 .collect(Collectors.toList());
         optionRegistry.register("delegate", "The type of the underlying data store to use", "memory");
-        optionRegistry.register("replica-file", "The name of the file containing replica URIs");
+        optionRegistry.register("replica-file", "The name of the file containing replica URIs. Required if you set discovery to `file`.");
         optionRegistry.register("beacon", "The beacon port for UDP replica registry", "10101");
-        optionRegistry.register("registry-uri", "The URI for the registry containing replica information");
+        optionRegistry.register("registry-uri", "The URI for the registry containing replica information", "Required if you set discovery to `registry`.");
         optionRegistry.register("discovery", "The mode of discovery, can be one of " + discoveryModes, ReplicaDiscoveryMode.ANNOUNCE.name().toLowerCase());
     }
 

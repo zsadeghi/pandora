@@ -40,4 +40,19 @@ public class ImmutableReplica implements Replica {
         return (R) result;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ImmutableReplica that = (ImmutableReplica) o;
+
+        return signature.equals(that.signature);
+    }
+
+    @Override
+    public int hashCode() {
+        return signature.hashCode();
+    }
+
 }

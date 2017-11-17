@@ -43,6 +43,9 @@ public class DistributedDataStore implements LockingDataStore {
 
     @Override
     public boolean store(String key, Serializable value) {
+        if (locked(key)) {
+            return delegate.store(key, value);
+        }
         lock(key);
         try {
             if (!lockKeyOnReplicaSet(key)) {
@@ -80,6 +83,9 @@ public class DistributedDataStore implements LockingDataStore {
 
     @Override
     public boolean delete(String key) {
+        if (locked(key)) {
+            return delegate.delete(key);
+        }
         lock(key);
         try {
             if (!lockKeyOnReplicaSet(key)) {

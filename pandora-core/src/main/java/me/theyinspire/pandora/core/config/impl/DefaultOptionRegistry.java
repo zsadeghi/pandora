@@ -101,11 +101,12 @@ public class DefaultOptionRegistry implements OptionRegistry {
             if (!options.containsKey(scope)) {
                 return fallback;
             }
-            return getOptions(scope).stream()
-                    .filter(option -> option.getName().equals(name))
-                    .map(Option::getDefaultValue)
-                    .findFirst()
-                    .orElse(fallback);
+            for (Option option : getOptions(scope)) {
+                if (option.getName().equals(name)) {
+                    return option.getDefaultValue();
+                }
+            }
+            return fallback;
         }
 
         private List<? extends Option> getOptions(String scope) {
