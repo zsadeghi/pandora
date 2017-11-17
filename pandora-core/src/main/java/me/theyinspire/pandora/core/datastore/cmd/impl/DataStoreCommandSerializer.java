@@ -41,6 +41,18 @@ public class DataStoreCommandSerializer implements CommandSerializer {
             return "has " + ((HasCommand) command).getKey();
         } else if (command instanceof AllCommand) {
             return "store";
+        } else if (command instanceof LockCommand) {
+            return "lock " + ((LockCommand) command).getKey();
+        } else if (command instanceof UnlockCommand) {
+            return "unlock " + ((UnlockCommand) command).getKey();
+        } else if (command instanceof IsLockedCommand) {
+            return "locked " + ((IsLockedCommand) command).getKey();
+        } else if (command instanceof RestoreCommand) {
+            return "restore " + ((RestoreCommand) command).getKey();
+        } else if (command instanceof GetUriCommand) {
+            return "uri";
+        } else if (command instanceof SignatureCommand) {
+            return "signature";
         }
         return null;
     }
@@ -94,6 +106,8 @@ public class DataStoreCommandSerializer implements CommandSerializer {
         } else if (command instanceof IsLockedCommand) {
             serialized = "locked "  + ((IsLockedCommand) command).getKey() + ": " + response;
         } else if (command instanceof GetUriCommand) {
+            serialized = String.valueOf(response);
+        } else if (command instanceof SignatureCommand) {
             serialized = String.valueOf(response);
         } else {
             throw new IllegalStateException();

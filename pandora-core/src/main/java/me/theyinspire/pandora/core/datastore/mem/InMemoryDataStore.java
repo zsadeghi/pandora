@@ -19,11 +19,13 @@ public class InMemoryDataStore implements LockingDataStore {
     private final Map<String, Serializable> storage;
     private final Map<String, Serializable> locked;
     private final UriServerConfigurationWriter configurationWriter;
+    private final String signature;
 
     public InMemoryDataStore(int initialCapacity) {
         storage = new HashMap<>(initialCapacity);
         locked = new HashMap<>();
         configurationWriter = new DefaultUriServerConfigurationWriter();
+        signature = UUID.randomUUID().toString();
     }
 
     public long size() {
@@ -107,6 +109,11 @@ public class InMemoryDataStore implements LockingDataStore {
     @Override
     public boolean locked(String key) {
         return locked.containsKey(key);
+    }
+
+    @Override
+    public String getSignature() {
+        return signature;
     }
 
 }

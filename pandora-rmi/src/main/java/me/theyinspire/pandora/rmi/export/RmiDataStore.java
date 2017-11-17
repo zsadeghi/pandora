@@ -44,4 +44,6 @@ public interface RmiDataStore extends Remote {
 
     boolean locked(String key) throws RemoteException;
 
+    String getSignature() throws RemoteException;
+
 }

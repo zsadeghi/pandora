@@ -99,4 +99,12 @@ public class SynchronizedDataStore implements LockingDataStore {
         return delegate instanceof LockingDataStore && ((LockingDataStore) delegate).locked(key);
     }
 
+    @Override
+    public String getSignature() {
+        if (delegate instanceof LockingDataStore) {
+            return ((LockingDataStore) delegate).getSignature();
+        }
+        return null;
+    }
+
 }

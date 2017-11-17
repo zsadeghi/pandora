@@ -18,4 +18,6 @@ public interface LockingDataStore extends DataStore {
 
     boolean locked(String key);
 
+    String getSignature();
+
 }

@@ -28,6 +28,7 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
     private static final String UNLOCK = "unlock";
     private static final String RESTORE = "restore";
     private static final String LOCKED = "locked";
+    private static final String SIGNATURE = "signature";
     private static final String URI = "uri";
 
     @Override
@@ -62,6 +63,8 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 return LockingDataStoreCommands.isLocked(reader.rest().trim());
             case URI:
                 return LockingDataStoreCommands.getUri(serverConfiguration);
+            case SIGNATURE:
+                return LockingDataStoreCommands.signature();
             case DEL:
                 return DataStoreCommands.delete(reader.rest().trim());
             case PUT:
@@ -105,6 +108,8 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
             return map;
         } else if (command instanceof LockingDataStoreCommand<?>) {
             if (command instanceof GetUriCommand) {
+                return response;
+            } else if (command instanceof SignatureCommand) {
                 return response;
             } else if (command instanceof IsLockedCommand) {
                 return Boolean.parseBoolean(response);

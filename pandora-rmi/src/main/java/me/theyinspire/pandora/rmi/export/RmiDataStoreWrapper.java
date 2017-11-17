@@ -147,4 +147,13 @@ public class RmiDataStoreWrapper implements LockingDataStore {
         }
     }
 
+    @Override
+    public String getSignature() {
+        try {
+            return delegate.getSignature();
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
 }

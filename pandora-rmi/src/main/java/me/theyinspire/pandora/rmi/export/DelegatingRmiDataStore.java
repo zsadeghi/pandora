@@ -109,4 +109,9 @@ public class DelegatingRmiDataStore implements RmiDataStore {
         return delegate instanceof LockingDataStore && ((LockingDataStore) delegate).locked(key);
     }
 
+    @Override
+    public String getSignature() throws RemoteException {
+        return delegate instanceof LockingDataStore ? ((LockingDataStore) delegate).getSignature() : null;
+    }
+
 }

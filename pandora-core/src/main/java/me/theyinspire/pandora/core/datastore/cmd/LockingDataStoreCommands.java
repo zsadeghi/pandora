@@ -28,6 +28,10 @@ public class LockingDataStoreCommands {
         return new IsLockedCommandImpl(key);
     }
 
+    public static SignatureCommand signature() {
+        return new SignatureCommandImpl();
+    }
+
     public static GetUriCommand getUri(ServerConfiguration serverConfiguration) {
         return new GetUriCommandImpl(serverConfiguration);
     }
@@ -129,6 +133,15 @@ public class LockingDataStoreCommands {
         public ServerConfiguration getServerConfiguration() {
             return serverConfiguration;
         }
+    }
+
+    private static class SignatureCommandImpl implements SignatureCommand {
+
+        @Override
+        public String toString() {
+            return "{getSignature()}";
+        }
+
     }
 
 }

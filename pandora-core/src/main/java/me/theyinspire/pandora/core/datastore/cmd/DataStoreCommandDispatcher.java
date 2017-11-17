@@ -53,6 +53,8 @@ public class DataStoreCommandDispatcher {
                 return (R) (Boolean) ((LockingDataStore) dataStore).locked(((IsLockedCommand) command).getKey());
             } else if (command instanceof GetUriCommand) {
                 return (R) ((LockingDataStore) dataStore).getUri(((GetUriCommand) command).getServerConfiguration());
+            } else if (command instanceof SignatureCommand) {
+                return (R) ((LockingDataStore) dataStore).getSignature();
             }
         }
         throw new UnsupportedOperationException("Unknown command: " + command);
