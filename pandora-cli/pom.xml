@@ -38,6 +38,11 @@
             <artifactId>pandora-rest</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>pandora-dds</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

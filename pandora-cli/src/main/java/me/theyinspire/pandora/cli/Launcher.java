@@ -77,6 +77,7 @@ public class Launcher {
 
     private static DataStoreRegistry setUpDataStoreRegistry() throws ClassNotFoundException {
         Class.forName("me.theyinspire.pandora.core.datastore.mem.Loader");
+        Class.forName("me.theyinspire.pandora.dds.Loader");
         loadPropertyClasses("pandora.stores");
         return DefaultDataStoreRegistry.getInstance();
     }

@@ -10,10 +10,12 @@ import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
  */
 public class DefaultDataStoreConfiguration extends AbstractScopedConfiguration implements DataStoreConfiguration {
 
+    private final Configuration delegate;
     private final String dataStore;
 
     public DefaultDataStoreConfiguration(Configuration delegate, String dataStore) {
         super(delegate);
+        this.delegate = delegate;
         this.dataStore = dataStore;
     }
 
@@ -24,6 +26,11 @@ public class DefaultDataStoreConfiguration extends AbstractScopedConfiguration i
     @Override
     protected ScopedOptionRegistry getOptionRegistry() {
         return DefaultOptionRegistry.getInstance().getDataStoreOptionRegistry(dataStore);
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return delegate;
     }
 
 }

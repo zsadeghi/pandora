@@ -1,0 +1,3 @@
+tcp://localhost:8080
+rest://localhost:8081/?base=data
+rmi://localhost:8082/?instance=dataStore

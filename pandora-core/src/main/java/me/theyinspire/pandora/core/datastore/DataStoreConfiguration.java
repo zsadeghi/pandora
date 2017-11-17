@@ -8,4 +8,6 @@ import me.theyinspire.pandora.core.config.Configuration;
  */
 public interface DataStoreConfiguration extends Configuration {
 
+    Configuration getConfiguration();
+
 }

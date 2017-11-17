@@ -96,6 +96,7 @@ public class InMemoryDataStore implements LockingDataStore {
         } else if (value != VOID) {
             store(key, value);
         }
+        unlock(key);
     }
 
     @Override
