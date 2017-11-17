@@ -2,9 +2,9 @@ package me.theyinspire.pandora.rest.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.theyinspire.pandora.core.datastore.DataStore;
-import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
+import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
 import me.theyinspire.pandora.core.server.error.ServerException;
 import me.theyinspire.pandora.rest.protocol.RequestMethod;
 import org.apache.commons.logging.Log;

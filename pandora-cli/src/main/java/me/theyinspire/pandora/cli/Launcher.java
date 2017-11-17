@@ -1,6 +1,5 @@
 package me.theyinspire.pandora.cli;
 
-import me.theyinspire.pandora.core.error.ConfigurationException;
 import me.theyinspire.pandora.cli.impl.DefaultConfigurationReader;
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.error.ClientException;
@@ -10,6 +9,7 @@ import me.theyinspire.pandora.core.config.ProtocolOption;
 import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
 import me.theyinspire.pandora.core.datastore.DataStoreRegistry;
 import me.theyinspire.pandora.core.datastore.impl.DefaultDataStoreRegistry;
+import me.theyinspire.pandora.core.error.ConfigurationException;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.ProtocolRegistry;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
