@@ -92,7 +92,7 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
     }
 
     private Command<?> deserializeCommand(String command) {
-        return deserializer.deserializeCommand(command);
+        return deserializer.deserializeCommand(command, configuration);
     }
 
     private String serializeResponse(Command<?> command, Object reply) {

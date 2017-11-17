@@ -38,7 +38,7 @@ public class RestClient implements Client {
         if (content.trim().equals("exit")) {
             return client.exit();
         }
-        final Command<?> command = deserializer.deserializeCommand(content);
+        final Command<?> command = deserializer.deserializeCommand(content, null);
         final Object result;
         if (command instanceof DataStoreCommand<?>) {
             try {

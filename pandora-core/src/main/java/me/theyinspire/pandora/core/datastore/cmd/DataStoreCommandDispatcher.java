@@ -1,6 +1,7 @@
 package me.theyinspire.pandora.core.datastore.cmd;
 
 import me.theyinspire.pandora.core.datastore.DataStore;
+import me.theyinspire.pandora.core.datastore.LockingDataStore;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -38,6 +39,21 @@ public class DataStoreCommandDispatcher {
             return (R) (Boolean) dataStore.has(hasCommand.getKey());
         } else if (command instanceof AllCommand) {
             return (R) dataStore.all();
+        } else if (command instanceof LockingDataStoreCommand<?> && dataStore instanceof LockingDataStore) {
+            if (command instanceof LockCommand) {
+                ((LockingDataStore) dataStore).lock(((LockCommand) command).getKey());
+                return null;
+            } else if (command instanceof UnlockCommand) {
+                ((LockingDataStore) dataStore).unlock(((UnlockCommand) command).getKey());
+                return null;
+            } else if (command instanceof RestoreCommand) {
+                ((LockingDataStore) dataStore).restore(((RestoreCommand) command).getKey());
+                return null;
+            } else if (command instanceof IsLockedCommand) {
+                return (R) (Boolean) ((LockingDataStore) dataStore).locked(((IsLockedCommand) command).getKey());
+            } else if (command instanceof GetUriCommand) {
+                return (R) ((LockingDataStore) dataStore).getUri(((GetUriCommand) command).getServerConfiguration());
+            }
         }
         throw new UnsupportedOperationException("Unknown command: " + command);
     }

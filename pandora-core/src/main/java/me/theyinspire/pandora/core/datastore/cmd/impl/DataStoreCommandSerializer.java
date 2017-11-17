@@ -85,6 +85,16 @@ public class DataStoreCommandSerializer implements CommandSerializer {
             serialized = ((Set<String>) response).stream().reduce((a, b) -> a + "," + b).orElse("");
         } else if (command instanceof HasCommand) {
             serialized = String.valueOf(response);
+        } else if (command instanceof LockCommand) {
+            serialized = "locked "  + ((LockCommand) command).getKey();
+        } else if (command instanceof UnlockCommand) {
+            serialized = "unlocked "  + ((UnlockCommand) command).getKey();
+        } else if (command instanceof RestoreCommand) {
+            serialized = "restored "  + ((RestoreCommand) command).getKey();
+        } else if (command instanceof IsLockedCommand) {
+            serialized = "locked "  + ((IsLockedCommand) command).getKey() + ": " + response;
+        } else if (command instanceof GetUriCommand) {
+            serialized = String.valueOf(response);
         } else {
             throw new IllegalStateException();
         }

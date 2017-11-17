@@ -3,6 +3,7 @@ package me.theyinspire.pandora.core.datastore.cmd.impl;
 import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.datastore.cmd.*;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.str.DocumentReader;
 import me.theyinspire.pandora.core.str.impl.DefaultDocumentReader;
 
@@ -23,9 +24,14 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
     private static final String KEYS = "keys";
     private static final String TRUNCATE = "truncate";
     private static final String HAS = "has";
+    private static final String LOCK = "lock";
+    private static final String UNLOCK = "unlock";
+    private static final String RESTORE = "restore";
+    private static final String LOCKED = "locked";
+    private static final String URI = "uri";
 
     @Override
-    public Command<?> deserializeCommand(String command) {
+    public Command<?> deserializeCommand(String command, ServerConfiguration serverConfiguration) {
         if (command == null) {
             return null;
         }
@@ -46,6 +52,16 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 return DataStoreCommands.has(reader.rest().trim());
             case GET:
                 return DataStoreCommands.get(reader.rest().trim());
+            case LOCK:
+                return LockingDataStoreCommands.lock(reader.rest().trim());
+            case UNLOCK:
+                return LockingDataStoreCommands.unlock(reader.rest().trim());
+            case RESTORE:
+                return LockingDataStoreCommands.restore(reader.rest().trim());
+            case LOCKED:
+                return LockingDataStoreCommands.isLocked(reader.rest().trim());
+            case URI:
+                return LockingDataStoreCommands.getUri(serverConfiguration);
             case DEL:
                 return DataStoreCommands.delete(reader.rest().trim());
             case PUT:
@@ -87,6 +103,14 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 map.put(portions[0], portions[1]);
             }
             return map;
+        } else if (command instanceof LockingDataStoreCommand<?>) {
+            if (command instanceof GetUriCommand) {
+                return response;
+            } else if (command instanceof IsLockedCommand) {
+                return Boolean.parseBoolean(response);
+            } else {
+                return null;
+            }
         }
         return UNKNOWN;
     }

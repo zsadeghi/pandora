@@ -3,6 +3,7 @@ package me.theyinspire.pandora.core.cmd.impl;
 import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.datastore.cmd.impl.DataStoreCommandDeserializer;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,14 +27,14 @@ public class AggregateCommandDeserializer implements CommandDeserializer {
     }
 
     @Override
-    public Command<?> deserializeCommand(String command) {
+    public Command<?> deserializeCommand(String command, ServerConfiguration serverConfiguration) {
         for (CommandDeserializer deserializer : deserializers) {
-            final Command<?> deserializedCommand = deserializer.deserializeCommand(command);
+            final Command<?> deserializedCommand = deserializer.deserializeCommand(command, serverConfiguration);
             if (deserializedCommand != null) {
                 return deserializedCommand;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Bad command: " + command);
     }
 
     @Override

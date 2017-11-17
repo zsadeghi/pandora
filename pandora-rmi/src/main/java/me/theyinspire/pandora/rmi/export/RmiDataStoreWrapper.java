@@ -1,6 +1,7 @@
 package me.theyinspire.pandora.rmi.export;
 
-import me.theyinspire.pandora.core.datastore.DataStore;
+import me.theyinspire.pandora.core.datastore.LockingDataStore;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.error.ServerException;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (10/29/17, 2:58 PM)
  */
-public class RmiDataStoreWrapper implements DataStore {
+public class RmiDataStoreWrapper implements LockingDataStore {
 
     private final RmiDataStore delegate;
 
@@ -96,6 +97,51 @@ public class RmiDataStoreWrapper implements DataStore {
     public Map<String, Serializable> all() {
         try {
             return delegate.all();
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public String getUri(ServerConfiguration configuration) {
+        try {
+            return delegate.getUri(configuration);
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public void lock(String key) {
+        try {
+            delegate.lock(key);
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public void restore(String key) {
+        try {
+            delegate.restore(key);
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public void unlock(String key) {
+        try {
+            delegate.unlock(key);
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public boolean locked(String key) {
+        try {
+            return delegate.locked(key);
         } catch (RemoteException e) {
             throw new ServerException("RMI transaction failed", e);
         }

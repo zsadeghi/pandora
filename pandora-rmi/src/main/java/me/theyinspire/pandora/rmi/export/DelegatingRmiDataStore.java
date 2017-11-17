@@ -1,6 +1,8 @@
 package me.theyinspire.pandora.rmi.export;
 
 import me.theyinspire.pandora.core.datastore.DataStore;
+import me.theyinspire.pandora.core.datastore.LockingDataStore;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.rmi.server.RmiServer;
 
 import java.io.Serializable;
@@ -71,6 +73,40 @@ public class DelegatingRmiDataStore implements RmiDataStore {
     public String exit() throws RemoteException {
         server.stop();
         return "bye";
+    }
+
+    @Override
+    public String getUri(ServerConfiguration configuration) throws RemoteException {
+        if (delegate instanceof LockingDataStore) {
+            return ((LockingDataStore) delegate).getUri(configuration);
+        }
+        return null;
+    }
+
+    @Override
+    public void lock(String key) throws RemoteException {
+        if (delegate instanceof LockingDataStore) {
+            ((LockingDataStore) delegate).lock(key);
+        }
+    }
+
+    @Override
+    public void restore(String key) throws RemoteException {
+        if (delegate instanceof LockingDataStore) {
+            ((LockingDataStore) delegate).restore(key);
+        }
+    }
+
+    @Override
+    public void unlock(String key) throws RemoteException {
+        if (delegate instanceof LockingDataStore) {
+            ((LockingDataStore) delegate).unlock(key);
+        }
+    }
+
+    @Override
+    public boolean locked(String key) throws RemoteException {
+        return delegate instanceof LockingDataStore && ((LockingDataStore) delegate).locked(key);
     }
 
 }

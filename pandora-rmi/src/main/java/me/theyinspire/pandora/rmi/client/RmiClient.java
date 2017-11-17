@@ -60,7 +60,7 @@ public class RmiClient implements Client {
                 throw new ClientException("Failed to exit the data store", e);
             }
         }
-        final Command<?> command = deserializer.deserializeCommand(content);
+        final Command<?> command = deserializer.deserializeCommand(content, null);
         final Object result;
         if (command instanceof DataStoreCommand<?>) {
             result = dispatcher.dispatch((DataStoreCommand<?>) command);

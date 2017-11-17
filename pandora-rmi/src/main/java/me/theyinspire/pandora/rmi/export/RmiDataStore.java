@@ -1,5 +1,7 @@
 package me.theyinspire.pandora.rmi.export;
 
+import me.theyinspire.pandora.core.server.ServerConfiguration;
+
 import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -31,4 +33,15 @@ public interface RmiDataStore extends Remote {
     Map<String, Serializable> all() throws RemoteException;
 
     String exit() throws RemoteException;
+
+    String getUri(ServerConfiguration configuration) throws RemoteException;
+
+    void lock(String key) throws RemoteException;
+
+    void restore(String key) throws RemoteException;
+
+    void unlock(String key) throws RemoteException;
+
+    boolean locked(String key) throws RemoteException;
+
 }
