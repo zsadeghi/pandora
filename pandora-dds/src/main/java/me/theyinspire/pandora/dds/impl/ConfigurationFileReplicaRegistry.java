@@ -17,7 +17,6 @@ import me.theyinspire.pandora.dds.Replica;
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
