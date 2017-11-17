@@ -2,6 +2,7 @@ package me.theyinspire.pandora.rest.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.theyinspire.pandora.core.client.Client;
+import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.client.error.ClientException;
 import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.cmd.CommandDeserializer;
@@ -21,8 +22,10 @@ public class RestClient implements Client {
     private final CommandSerializer serializer;
     private final DataStoreCommandDispatcher dispatcher;
     private final DataStoreClient client;
+    private final ClientConfiguration configuration;
 
-    public RestClient(String host, int port, String prefix, ObjectMapper mapper) {
+    public RestClient(ClientConfiguration configuration, String host, int port, String prefix, ObjectMapper mapper) {
+        this.configuration = configuration;
         String baseURl = prefix == null ? "" : prefix
                 .replaceAll("/+", "/")
                 .replaceFirst("^/", "")
@@ -31,6 +34,11 @@ public class RestClient implements Client {
         serializer = AggregateCommandSerializer.getInstance();
         client = new DataStoreClient("http://" + host + ":" + port + "/" + baseURl, mapper);
         dispatcher = new DataStoreCommandDispatcher(client);
+    }
+
+    @Override
+    public ClientConfiguration getConfiguration() {
+        return configuration;
     }
 
     @Override

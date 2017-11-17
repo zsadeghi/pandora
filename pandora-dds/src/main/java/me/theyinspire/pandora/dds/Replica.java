@@ -1,6 +1,5 @@
 package me.theyinspire.pandora.dds;
 
-import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 
 /**
@@ -8,8 +7,6 @@ import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
  * @since 1.0 (11/16/17, 5:56 PM)
  */
 public interface Replica {
-
-    ClientConfiguration getClientConfiguration();
 
     String getSignature();
 

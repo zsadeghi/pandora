@@ -9,7 +9,9 @@ import me.theyinspire.pandora.core.datastore.DataStoreFactory;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.datastore.impl.DefaultDataStoreRegistry;
 import me.theyinspire.pandora.core.error.ConfigurationException;
+import me.theyinspire.pandora.dds.ReplicaRegistry;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +36,27 @@ public class DistributedDataStoreFactory implements DataStoreFactory {
         if (!(delegate instanceof LockingDataStore)) {
             throw new ConfigurationException("Data store type <" + delegateName + ">  is not capable of handling locking operations");
         }
-        return new DistributedDataStore((LockingDataStore) delegate, null);
+        final ReplicaRegistry replicaRegistry = getReplicaRegistry(configuration);
+        return new DistributedDataStore((LockingDataStore) delegate, replicaRegistry);
+    }
+
+    private ReplicaRegistry getReplicaRegistry(DataStoreConfiguration configuration) {
+        final ReplicaDiscoveryMode discoveryMode = ReplicaDiscoveryMode.valueOf(configuration.require("discovery").toUpperCase());
+        final ReplicaRegistry replicaRegistry;
+        switch (discoveryMode) {
+            case FILE:
+                replicaRegistry = new ConfigurationFileReplicaRegistry(new File(configuration.require("replica-file")));
+                break;
+            case ANNOUNCE:
+                replicaRegistry = null;
+                break;
+            case REGISTRY:
+                replicaRegistry = null;
+                break;
+            default:
+                throw new ConfigurationException("Unknown replica registry type");
+        }
+        return replicaRegistry;
     }
 
     @Override

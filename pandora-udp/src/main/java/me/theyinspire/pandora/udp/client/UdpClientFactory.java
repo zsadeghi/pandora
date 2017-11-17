@@ -16,7 +16,7 @@ public class UdpClientFactory implements ClientFactory {
     @Override
     public Client getInstance(ClientConfiguration configuration) {
         try {
-            return new UdpClient(InetAddress.getByName(configuration.getHost()), configuration.getPort());
+            return new UdpClient(configuration, InetAddress.getByName(configuration.getHost()), configuration.getPort());
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Invalid host name", e);
         }

@@ -1,5 +1,6 @@
 package me.theyinspire.pandora.udp.client;
 
+import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.client.impl.AbstractClient;
 import me.theyinspire.pandora.udp.protocol.UdpProtocol;
 
@@ -14,7 +15,8 @@ public class UdpClient extends AbstractClient<UdpProtocol, UdpClientTransaction,
     private final InetAddress destination;
     private final int port;
 
-    public UdpClient(InetAddress destination, int port) {
+    public UdpClient(ClientConfiguration configuration, InetAddress destination, int port) {
+        super(configuration);
         this.destination = destination;
         this.port = port;
     }

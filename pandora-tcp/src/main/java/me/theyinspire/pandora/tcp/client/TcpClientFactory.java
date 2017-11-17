@@ -16,7 +16,7 @@ public class TcpClientFactory implements ClientFactory {
     @Override
     public Client getInstance(ClientConfiguration configuration) {
         try {
-            return new TcpClient(InetAddress.getByName(configuration.getHost()), configuration.getPort());
+            return new TcpClient(configuration, InetAddress.getByName(configuration.getHost()), configuration.getPort());
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Unknown host name", e);
         }

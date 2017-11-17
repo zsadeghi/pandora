@@ -1,6 +1,7 @@
 package me.theyinspire.pandora.rmi.client;
 
 import me.theyinspire.pandora.core.client.Client;
+import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.client.error.ClientException;
 import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.cmd.CommandDeserializer;
@@ -27,12 +28,14 @@ public class RmiClient implements Client {
     private final CommandDeserializer deserializer;
     private final DataStoreCommandDispatcher dispatcher;
     private final RmiDataStore dataStore;
+    private final ClientConfiguration configuration;
 
-    public RmiClient(String host) {
-        this(host, "dataStore");
+    public RmiClient(ClientConfiguration configuration, String host) {
+        this(configuration, host, "dataStore");
     }
 
-    public RmiClient(String host, String name) {
+    public RmiClient(ClientConfiguration configuration, String host, String name) {
+        this.configuration = configuration;
         final Registry registry;
         try {
             registry = LocateRegistry.getRegistry(host);
@@ -49,6 +52,11 @@ public class RmiClient implements Client {
         dispatcher = new DataStoreCommandDispatcher(new RmiDataStoreWrapper(dataStore));
         serializer = AggregateCommandSerializer.getInstance();
         deserializer = AggregateCommandDeserializer.getInstance();
+    }
+
+    @Override
+    public ClientConfiguration getConfiguration() {
+        return configuration;
     }
 
     @Override

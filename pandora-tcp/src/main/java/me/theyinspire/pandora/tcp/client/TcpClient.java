@@ -1,5 +1,6 @@
 package me.theyinspire.pandora.tcp.client;
 
+import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.client.impl.AbstractClient;
 import me.theyinspire.pandora.tcp.protocol.TcpProtocol;
 
@@ -15,7 +16,8 @@ public class TcpClient extends AbstractClient<TcpProtocol, TcpClientTransaction,
     private final int port;
     private final TcpProtocol protocol;
 
-    public TcpClient(InetAddress inetAddress, int port) {
+    public TcpClient(ClientConfiguration configuration, InetAddress inetAddress, int port) {
+        super(configuration);
         this.inetAddress = inetAddress;
         this.port = port;
         this.protocol = TcpProtocol.getInstance();

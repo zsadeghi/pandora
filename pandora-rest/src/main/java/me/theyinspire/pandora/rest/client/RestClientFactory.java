@@ -13,7 +13,7 @@ public class RestClientFactory implements ClientFactory {
 
     @Override
     public Client getInstance(ClientConfiguration configuration) {
-        return new RestClient(configuration.getHost(), configuration.getPort(), configuration.get("base", ""), new ObjectMapper());
+        return new RestClient(configuration, configuration.getHost(), configuration.getPort(), configuration.get("base", ""), new ObjectMapper());
     }
 
 }

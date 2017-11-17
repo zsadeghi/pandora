@@ -8,6 +8,8 @@ import me.theyinspire.pandora.core.client.error.ClientException;
  */
 public interface Client {
 
+    ClientConfiguration getConfiguration();
+
     String send(String content) throws ClientException;
 
 }
