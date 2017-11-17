@@ -46,7 +46,7 @@ public class DistributedDataStoreFactory implements DataStoreFactory {
         final ReplicaRegistry replicaRegistry;
         switch (discoveryMode) {
             case FILE:
-                replicaRegistry = new ConfigurationFileReplicaRegistry(new File(configuration.require("replica-file")));
+                replicaRegistry = new ConfigurationFileReplicaRegistry(new File(configuration.require("replica-file")), Integer.parseInt(configuration.require("replica-file-refresh")));
                 break;
             case BEACON:
                 replicaRegistry = new BeaconReplicaRegistry(Integer.parseInt(configuration.require("beacon-port")));
@@ -69,6 +69,7 @@ public class DistributedDataStoreFactory implements DataStoreFactory {
                 .collect(Collectors.toList());
         optionRegistry.register("delegate", "The type of the underlying data store to use", "memory");
         optionRegistry.register("replica-file", "The name of the file containing replica URIs. Required if you set discovery to `file`.");
+        optionRegistry.register("replica-file-refresh", "Milliseconds between refreshes of the file. `0` means no refresh", "0");
         optionRegistry.register("beacon-port", "The beacon port for UDP replica registry", "10101");
         optionRegistry.register("registry-uri", "The URI for the registry containing replica information. Required if you set discovery to `registry`.");
         optionRegistry.register("discovery", "The mode of discovery, can be one of " + discoveryModes, ReplicaDiscoveryMode.BEACON.name().toLowerCase());
