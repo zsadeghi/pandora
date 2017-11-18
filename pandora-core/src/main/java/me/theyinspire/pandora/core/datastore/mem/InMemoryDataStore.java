@@ -169,11 +169,13 @@ public class InMemoryDataStore implements LockingDataStore {
         private Serializable value;
         private long timestamp;
         private boolean deleted;
+        private boolean fresh;
 
         private Entry(String key, Serializable value) {
             this.key = key;
             mutate(value);
             deleted = false;
+            fresh = false;
         }
 
         private void mutate(Serializable value) {
@@ -182,6 +184,7 @@ public class InMemoryDataStore implements LockingDataStore {
 
         private void mutate(Serializable value, boolean keepTimestamp) {
             this.value = value;
+            deleted = false;
             if (!keepTimestamp) {
                 this.timestamp = System.currentTimeMillis();
             }
@@ -209,6 +212,10 @@ public class InMemoryDataStore implements LockingDataStore {
             markDeleted(false);
         }
 
+        public void markFresh() {
+            fresh = true;
+        }
+
         public void markDeleted(boolean keepTimestamp) {
             mutate(null, keepTimestamp);
             deleted = true;
@@ -218,6 +225,13 @@ public class InMemoryDataStore implements LockingDataStore {
             return deleted;
         }
 
+        public boolean isFresh() {
+            return fresh;
+        }
+
+        public void bake() {
+            fresh = false;
+        }
     }
 
     private static class Lock {
@@ -282,7 +296,9 @@ public class InMemoryDataStore implements LockingDataStore {
         @Override
         public String lock(String key) {
             if (!entries.containsKey(key)) {
-                throw new ServerException("Entry does not exist: " + key);
+                final Entry entry = new Entry(key, null);
+                entry.markFresh();
+                entries.put(key, entry);
             }
             if (isExclusive() && isLocked(key)) {
                 throw new ServerException("Key is already locked: " + key);
@@ -369,7 +385,7 @@ public class InMemoryDataStore implements LockingDataStore {
 
         @Override
         protected Lock doLock(String key) {
-            final Lock lock = new Lock(getEntries().get(key));
+            final Lock lock = new Lock(getEntries().get(key).copy());
             locks.put(key, lock);
             return lock;
         }
@@ -378,7 +394,11 @@ public class InMemoryDataStore implements LockingDataStore {
         protected void doRelinquish(String key, String lock) {
             final Lock value = locks.remove(key);
             final Entry entry = value.getEntry();
-            getEntries().put(key, entry);
+            if (entry.isFresh() || entry.isDeleted() && getEntries().containsKey(key)) {
+                getEntries().remove(key);
+            } else {
+                getEntries().put(key, entry);
+            }
         }
 
         @Override
@@ -389,8 +409,9 @@ public class InMemoryDataStore implements LockingDataStore {
         @Override
         protected void doUnlock(String key, String lock) {
             locks.remove(key);
-            if (getEntries().get(key).isDeleted()) {
-                getEntries().remove(key);
+            final Entry entry = getEntries().get(key);
+            if (entry.isFresh()) {
+                entry.bake();
             }
         }
 
@@ -467,6 +488,9 @@ public class InMemoryDataStore implements LockingDataStore {
             if (entry.isDeleted()) {
                 getEntries().remove(key);
             } else {
+                if (entry.isFresh()) {
+                    entry.bake();
+                }
                 getEntries().put(key, entry);
             }
             itemLocks.remove(lock);

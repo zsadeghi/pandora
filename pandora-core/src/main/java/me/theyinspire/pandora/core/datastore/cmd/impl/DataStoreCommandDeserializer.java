@@ -125,13 +125,13 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
             } else if (command instanceof SignatureCommand) {
                 return (R) response;
             } else if (command instanceof IsLockedCommand) {
-                return (R) (Boolean) Boolean.parseBoolean(response);
+                return (R) (Boolean) (response.startsWith("locked ") && Boolean.parseBoolean(response.substring(response.lastIndexOf(':') + 2)));
             } else if (command instanceof LockedStoreCommand) {
-                return (R) (Boolean) Boolean.parseBoolean(response);
+                return (R) (Boolean) response.startsWith("put");
             } else if (command instanceof LockedDeleteCommand) {
-                return (R) (Boolean) Boolean.parseBoolean(response);
+                return (R) (Boolean) response.startsWith("delete");
             } else if (command instanceof LockCommand) {
-                return (R) response;
+                return (R) response.substring(response.lastIndexOf(' ') + 1);
             } else {
                 return null;
             }
