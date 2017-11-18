@@ -1,4 +1,4 @@
 tcp://localhost:8081
-udp://localhost:8082
-udp://localhost:8083
-udp://localhost:8084
+tcp://localhost:8082
+tcp://localhost:8083
+tcp://localhost:8084

@@ -3,7 +3,6 @@ package me.theyinspire.pandora.dds.impl;
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.client.UriClientConfigurationReader;
-import me.theyinspire.pandora.core.client.error.ClientException;
 import me.theyinspire.pandora.core.client.impl.DefaultUriClientConfigurationReader;
 import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
@@ -37,7 +36,10 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
         deserializer = AggregateCommandDeserializer.getInstance();
         clients = new CopyOnWriteArraySet<>();
         fileReader = new ConfigurationFileReader(clients, file, refreshRate);
-        new Thread(fileReader).start();
+        fileReader.runOne();
+        if (refreshRate > 0) {
+            new Thread(fileReader).start();
+        }
     }
 
     @Override
@@ -49,7 +51,7 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
             final String result;
             try {
                 result = client.send(serializedCommand);
-            } catch (ClientException e) {
+            } catch (Exception e) {
                 continue;
             }
             final String signature = (String) deserializer.deserializeResponse(signatureCommand, result);
@@ -79,39 +81,7 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
         @Override
         public void run() {
             while (running.get()) {
-                final BufferedReader reader;
-                final UriClientConfigurationReader configurationReader = new DefaultUriClientConfigurationReader();
-                final Set<Client> clients = new HashSet<>();
-                try {
-                    reader = new BufferedReader(new FileReader(file));
-                } catch (FileNotFoundException e) {
-                    throw new ServerException("Failed to read configuration file", e);
-                }
-                try {
-                    while (true) {
-                        final String line;
-                        try {
-                            line = reader.readLine();
-                        } catch (IOException e) {
-                            throw new ServerException("Failed to read file contents", e);
-                        }
-                        if (line == null) {
-                            break;
-                        }
-                        final ClientConfiguration clientConfiguration = configurationReader.read(line);
-                        final Client client = DefaultProtocolRegistry.getInstance().getClient(clientConfiguration.getProtocol(), clientConfiguration);
-                        clients.add(client);
-                    }
-                } finally {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        //noinspection ThrowFromFinallyBlock
-                        throw new ServerException("Failed to close the file", e);
-                    }
-                }
-                this.clients.clear();
-                this.clients.addAll(clients);
+                runOne();
                 if (refreshRate == 0) {
                     break;
                 }
@@ -121,6 +91,42 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
                     throw new ServerException("Interrupting while sleeping between file refreshes", e);
                 }
             }
+        }
+
+        public void runOne() {
+            final BufferedReader reader;
+            final UriClientConfigurationReader configurationReader = new DefaultUriClientConfigurationReader();
+            final Set<Client> clients = new HashSet<>();
+            try {
+                reader = new BufferedReader(new FileReader(file));
+            } catch (FileNotFoundException e) {
+                throw new ServerException("Failed to read configuration file", e);
+            }
+            try {
+                while (true) {
+                    final String line;
+                    try {
+                        line = reader.readLine();
+                    } catch (IOException e) {
+                        throw new ServerException("Failed to read file contents", e);
+                    }
+                    if (line == null) {
+                        break;
+                    }
+                    final ClientConfiguration clientConfiguration = configurationReader.read(line);
+                    final Client client = DefaultProtocolRegistry.getInstance().getClient(clientConfiguration.getProtocol(), clientConfiguration);
+                    clients.add(client);
+                }
+            } finally {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    //noinspection ThrowFromFinallyBlock
+                    throw new ServerException("Failed to close the file", e);
+                }
+            }
+            this.clients.clear();
+            this.clients.addAll(clients);
         }
 
         public void stop() {
