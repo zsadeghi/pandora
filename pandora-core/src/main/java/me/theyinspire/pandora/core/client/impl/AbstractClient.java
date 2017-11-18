@@ -31,6 +31,9 @@ public abstract class AbstractClient<P extends Protocol, T extends ClientTransac
         transaction.send(content);
         String response = transaction.receive();
         transaction.close();
+        if (response.startsWith("error")) {
+            throw new ClientException("Communication failure: " + response);
+        }
         return response;
     }
 

@@ -5,6 +5,7 @@ import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
+import me.theyinspire.pandora.core.cmd.impl.DefaultErrorSerializer;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
@@ -68,9 +69,14 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
             getLog().debug("Scheduling command " + command);
             if (command instanceof DataStoreCommand<?>) {
                 executor.submit(() -> {
-                    getLog().info("Executing data store command: " + command);
-                    final Object result = dispatcher.dispatch((DataStoreCommand<?>) command);
-                    final String serialized = serializeResponse(command, result);
+                    String serialized;
+                    try {
+                        getLog().info("Executing data store command: " + command);
+                        final Object result = dispatcher.dispatch((DataStoreCommand<?>) command);
+                        serialized = serializeResponse(command, result);
+                    } catch (Exception e) {
+                        serialized = "error occurred: " + DefaultErrorSerializer.getInstance().serialize(e);
+                    }
                     O reply = compose(received, serialized);
                     getLog().debug("Responding to the query.");
                     transaction.send(reply);

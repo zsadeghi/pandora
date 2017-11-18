@@ -3,6 +3,7 @@ package me.theyinspire.pandora.core.datastore.impl;
 import me.theyinspire.pandora.core.datastore.BaseDataStoreTest;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.mem.InMemoryDataStore;
+import me.theyinspire.pandora.core.datastore.mem.LockingMethod;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -12,7 +13,7 @@ public class SynchronizedDataStoreTest extends BaseDataStoreTest {
 
     @Override
     protected DataStore getDataStore() {
-        return new SynchronizedDataStore(new InMemoryDataStore(100));
+        return new SynchronizedDataStore(new InMemoryDataStore(100, LockingMethod.OPTIMISTIC));
     }
 
 }

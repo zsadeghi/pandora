@@ -1,6 +1,7 @@
 package me.theyinspire.pandora.dds.impl;
 
 import me.theyinspire.pandora.core.client.Client;
+import me.theyinspire.pandora.core.client.ClientConfiguration;
 import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
@@ -14,6 +15,7 @@ import me.theyinspire.pandora.dds.Replica;
  */
 public class ImmutableReplica implements Replica {
 
+    private static final String FORMAT = "%s://%s:%d";
     private final String signature;
     private final Client client;
     private final CommandDeserializer deserializer;
@@ -53,6 +55,12 @@ public class ImmutableReplica implements Replica {
     @Override
     public int hashCode() {
         return signature.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        final ClientConfiguration configuration = client.getConfiguration();
+        return String.format(FORMAT, configuration.getProtocol().getName(), configuration.getHost(), configuration.getPort());
     }
 
 }

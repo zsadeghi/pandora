@@ -33,9 +33,9 @@ public abstract class AbstractReplicaRegistry implements ReplicaRegistry {
         for (Replica replica : replicaSet) {
             final Map<String, Serializable> values = replica.send(DataStoreCommands.all());
             for (Map.Entry<String, Serializable> entry : values.entrySet()) {
-                dataStore.lock(entry.getKey());
+                final String lock = dataStore.lock(entry.getKey());
                 dataStore.store(entry.getKey(), entry.getValue());
-                dataStore.unlock(entry.getKey());
+                dataStore.unlock(entry.getKey(), lock);
             }
         }
         onAfterDataSync(signature, uri, dataStore);

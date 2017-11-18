@@ -36,14 +36,20 @@ public interface RmiDataStore extends Remote {
 
     String getUri(ServerConfiguration configuration) throws RemoteException;
 
-    void lock(String key) throws RemoteException;
+    String lock(String key) throws RemoteException;
 
-    void restore(String key) throws RemoteException;
+    void restore(String key, String lock) throws RemoteException;
 
-    void unlock(String key) throws RemoteException;
+    void unlock(String key, String lock) throws RemoteException;
 
     boolean locked(String key) throws RemoteException;
 
     String getSignature() throws RemoteException;
+
+    boolean store(String key, Serializable value, String lock) throws RemoteException;
+
+    boolean delete(String key, String lock) throws RemoteException;
+
+    Serializable get(String key, String lock) throws RemoteException;
 
 }

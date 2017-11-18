@@ -73,24 +73,43 @@ public class SynchronizedDataStore implements LockingDataStore, InitializingData
     }
 
     @Override
-    public synchronized void lock(String key) {
+    public synchronized String lock(String key) {
         if (delegate instanceof LockingDataStore) {
-            ((LockingDataStore) delegate).lock(key);
+            return ((LockingDataStore) delegate).lock(key);
+        }
+        return null;
+    }
+
+    @Override
+    public synchronized void restore(String key, String lock) {
+        if (delegate instanceof LockingDataStore) {
+            ((LockingDataStore) delegate).restore(key, lock);
         }
     }
 
     @Override
-    public synchronized void restore(String key) {
+    public synchronized void unlock(String key, String lock) {
         if (delegate instanceof LockingDataStore) {
-            ((LockingDataStore) delegate).restore(key);
+            ((LockingDataStore) delegate).unlock(key, lock);
         }
     }
 
     @Override
-    public synchronized void unlock(String key) {
+    public boolean store(String key, Serializable value, String lock) {
+        return delegate instanceof LockingDataStore && ((LockingDataStore) delegate).store(key, value, lock);
+    }
+
+    @Override
+    public boolean delete(String key, String lock) {
+        return delegate instanceof LockingDataStore && ((LockingDataStore) delegate).delete(key, lock);
+    }
+
+    @Override
+    public Serializable get(String key, String lock) {
         if (delegate instanceof LockingDataStore) {
-            ((LockingDataStore) delegate).unlock(key);
+            return ((LockingDataStore) delegate).get(key, lock);
         }
+        return null;
     }
 
     @Override

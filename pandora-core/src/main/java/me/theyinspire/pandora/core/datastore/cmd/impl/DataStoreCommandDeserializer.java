@@ -21,6 +21,9 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
     private static final String PUT = "put";
     private static final String GET = "get";
     private static final String DEL = "del";
+    private static final String XPUT = "xput";
+    private static final String XGET = "xget";
+    private static final String XDEL = "xdel";
     private static final String KEYS = "keys";
     private static final String TRUNCATE = "truncate";
     private static final String HAS = "has";
@@ -37,7 +40,7 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
             return null;
         }
         final DocumentReader reader = new DefaultDocumentReader(command);
-        final String word = reader.expect("\\S+", true).toLowerCase();
+        final String word = readWord(reader).toLowerCase();
         switch (word) {
             case SIZE:
                 return DataStoreCommands.size();
@@ -51,27 +54,36 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 return DataStoreCommands.truncate();
             case HAS:
                 return DataStoreCommands.has(reader.rest().trim());
-            case GET:
-                return DataStoreCommands.get(reader.rest().trim());
             case LOCK:
                 return LockingDataStoreCommands.lock(reader.rest().trim());
             case UNLOCK:
-                return LockingDataStoreCommands.unlock(reader.rest().trim());
+                return LockingDataStoreCommands.unlock(readWord(reader), reader.rest().trim());
             case RESTORE:
-                return LockingDataStoreCommands.restore(reader.rest().trim());
+                return LockingDataStoreCommands.restore(readWord(reader), reader.rest().trim());
             case LOCKED:
                 return LockingDataStoreCommands.isLocked(reader.rest().trim());
             case URI:
                 return LockingDataStoreCommands.getUri(serverConfiguration);
             case SIGNATURE:
                 return LockingDataStoreCommands.signature();
+            case GET:
+                return DataStoreCommands.get(reader.rest().trim());
             case DEL:
                 return DataStoreCommands.delete(reader.rest().trim());
             case PUT:
-                final String key = reader.expect("\\S+", true).toLowerCase();
-                return DataStoreCommands.store(key, reader.rest().trim());
+                return DataStoreCommands.store(readWord(reader), reader.rest().trim());
+            case XGET:
+                return LockingDataStoreCommands.get(readWord(reader), reader.rest().trim());
+            case XDEL:
+                return LockingDataStoreCommands.delete(readWord(reader), reader.rest().trim());
+            case XPUT:
+                return LockingDataStoreCommands.store(readWord(reader), readWord(reader), reader.rest().trim());
         }
         return null;
+    }
+
+    private String readWord(DocumentReader reader) {
+        return reader.expect("\\S+", true);
     }
 
     @SuppressWarnings("unchecked")
@@ -83,7 +95,7 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
             return (R) (Boolean) Boolean.parseBoolean(response);
         } else if (command instanceof StoreCommand) {
             return (R) (Boolean) response.startsWith("put");
-        } else if (command instanceof GetCommand) {
+        } else if (command instanceof GetCommand || command instanceof LockedGetCommand) {
             if (!response.matches("get key=.*? val=.*?")) {
                 throw new IllegalArgumentException("Poorly formatted response: " + response);
             }
@@ -114,6 +126,12 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 return (R) response;
             } else if (command instanceof IsLockedCommand) {
                 return (R) (Boolean) Boolean.parseBoolean(response);
+            } else if (command instanceof LockedStoreCommand) {
+                return (R) (Boolean) Boolean.parseBoolean(response);
+            } else if (command instanceof LockedDeleteCommand) {
+                return (R) (Boolean) Boolean.parseBoolean(response);
+            } else if (command instanceof LockCommand) {
+                return (R) response;
             } else {
                 return null;
             }

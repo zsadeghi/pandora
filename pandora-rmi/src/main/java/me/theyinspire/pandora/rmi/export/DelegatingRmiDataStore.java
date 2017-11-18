@@ -84,23 +84,24 @@ public class DelegatingRmiDataStore implements RmiDataStore {
     }
 
     @Override
-    public void lock(String key) throws RemoteException {
+    public String lock(String key) throws RemoteException {
         if (delegate instanceof LockingDataStore) {
-            ((LockingDataStore) delegate).lock(key);
+            return ((LockingDataStore) delegate).lock(key);
+        }
+        return null;
+    }
+
+    @Override
+    public void restore(String key, String lock) throws RemoteException {
+        if (delegate instanceof LockingDataStore) {
+            ((LockingDataStore) delegate).restore(key, lock);
         }
     }
 
     @Override
-    public void restore(String key) throws RemoteException {
+    public void unlock(String key, String lock) throws RemoteException {
         if (delegate instanceof LockingDataStore) {
-            ((LockingDataStore) delegate).restore(key);
-        }
-    }
-
-    @Override
-    public void unlock(String key) throws RemoteException {
-        if (delegate instanceof LockingDataStore) {
-            ((LockingDataStore) delegate).unlock(key);
+            ((LockingDataStore) delegate).unlock(key, lock);
         }
     }
 
@@ -112,6 +113,24 @@ public class DelegatingRmiDataStore implements RmiDataStore {
     @Override
     public String getSignature() throws RemoteException {
         return delegate instanceof LockingDataStore ? ((LockingDataStore) delegate).getSignature() : null;
+    }
+
+    @Override
+    public boolean store(String key, Serializable value, String lock) throws RemoteException {
+        return delegate instanceof LockingDataStore && ((LockingDataStore) delegate).store(key, value, lock);
+    }
+
+    @Override
+    public boolean delete(String key, String lock) throws RemoteException {
+        return delegate instanceof LockingDataStore && ((LockingDataStore) delegate).delete(key, lock);
+    }
+
+    @Override
+    public Serializable get(String key, String lock) throws RemoteException {
+        if (delegate instanceof LockingDataStore) {
+            return ((LockingDataStore) delegate).get(key, lock);
+        }
+        return null;
     }
 
 }

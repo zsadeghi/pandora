@@ -13,6 +13,7 @@ import me.theyinspire.pandora.dds.Replica;
 import me.theyinspire.pandora.dds.ReplicaRegistry;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -53,29 +54,30 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
         if (locked(key)) {
             return delegate.store(key, value);
         }
-        lock(key);
+        final String lock = lock(key);
         try {
-            if (!lockKeyOnReplicaSet(key)) {
+            final Map<String, String> locks = lockKeyOnReplicaSet(key);
+            if (locks == null) {
                 return false;
             }
-            if (!storeOnReplicaSet(key, value)) {
+            if (!storeOnReplicaSet(key, value, locks)) {
                 return false;
             }
-            unlockKeyOnReplicaSet(key);
+            unlockKeyOnReplicaSet(key, locks);
             return delegate.store(key, value);
         } finally {
-            unlock(key);
+            unlock(key, lock);
         }
     }
 
     @Override
-    public void lock(String key) {
-        delegate.lock(key);
+    public String lock(String key) {
+        return delegate.lock(key);
     }
 
     @Override
-    public void restore(String key) {
-        delegate.restore(key);
+    public void restore(String key, String lock) {
+        delegate.restore(key, lock);
     }
 
     @Override
@@ -84,8 +86,23 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
     }
 
     @Override
-    public void unlock(String key) {
-        delegate.unlock(key);
+    public void unlock(String key, String lock) {
+        delegate.unlock(key, lock);
+    }
+
+    @Override
+    public boolean store(String key, Serializable value, String lock) {
+        return delegate.store(key, value, lock);
+    }
+
+    @Override
+    public boolean delete(String key, String lock) {
+        return delegate.delete(key, lock);
+    }
+
+    @Override
+    public Serializable get(String key, String lock) {
+        return delegate.get(key, lock);
     }
 
     @Override
@@ -93,18 +110,19 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
         if (locked(key)) {
             return delegate.delete(key);
         }
-        lock(key);
+        final String lock = lock(key);
         try {
-            if (!lockKeyOnReplicaSet(key)) {
+            final Map<String, String> locks = lockKeyOnReplicaSet(key);
+            if (locks == null) {
                 return false;
             }
-            if (!deleteOnReplicaSet(key)) {
+            if (!deleteOnReplicaSet(key, locks)) {
                 return false;
             }
-            unlockKeyOnReplicaSet(key);
+            unlockKeyOnReplicaSet(key, locks);
             return delegate.delete(key);
         } finally {
-            unlock(key);
+            unlock(key, lock);
         }
     }
 
@@ -141,63 +159,84 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
         return delegate.all();
     }
 
-    private boolean storeOnReplicaSet(String key, Serializable value) {
+    private boolean storeOnReplicaSet(String key, Serializable value, Map<String, String> locks) {
         final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(this);
         final StoreCommand storeCommand = DataStoreCommands.store(key, value);
-        final RestoreCommand restoreCommand = LockingDataStoreCommands.restore(key);
         for (Replica replica : replicaSet) {
-            if (!tryWithRollback(replica, storeCommand, restoreCommand, replicaSet)) {
+            final RestoreCommand restoreCommand = LockingDataStoreCommands.restore(key, locks.get(replica.getSignature()));
+            try {
+                replica.send(storeCommand);
+            } catch (Exception e) {
+                for (Replica modifiedReplica : replicaSet) {
+                    modifiedReplica.send(restoreCommand);
+                }
                 return false;
             }
         }
         return true;
     }
 
-    private boolean deleteOnReplicaSet(String key) {
+    private boolean deleteOnReplicaSet(String key, Map<String, String> locks) {
         final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(this);
         final DeleteCommand deleteCommand = DataStoreCommands.delete(key);
-        final RestoreCommand restoreCommand = LockingDataStoreCommands.restore(key);
         for (Replica replica : replicaSet) {
-            if (!tryWithRollback(replica, deleteCommand, restoreCommand, replicaSet)) {
+            final RestoreCommand restoreCommand = LockingDataStoreCommands.restore(key, locks.get(replica.getSignature()));
+            try {
+                replica.send(deleteCommand);
+            } catch (Exception e) {
+                for (Replica modifiedReplica : replicaSet) {
+                    modifiedReplica.send(restoreCommand);
+                }
                 return false;
             }
         }
         return true;
     }
 
-    private boolean lockKeyOnReplicaSet(String key) {
+    private Map<String, String> lockKeyOnReplicaSet(String key) {
+        final Map<String, String> locks = new HashMap<>();
         final LockCommand lockCommand = LockingDataStoreCommands.lock(key);
-        final UnlockCommand unlockCommand = LockingDataStoreCommands.unlock(key);
         final Set<Replica> lockedReplicaSet = new HashSet<>();
         for (Replica replica : replicaRegistry.getReplicaSet(this)) {
-            if (!tryWithRollback(replica, lockCommand, unlockCommand, lockedReplicaSet)) {
-                return false;
+            final String lock;
+            try {
+                try {
+                    lock = replica.send(lockCommand);
+                } catch (Exception e) {
+                    for (Replica modifiedReplica : lockedReplicaSet) {
+                        final UnlockCommand unlockCommand = LockingDataStoreCommands.unlock(key, locks.get(modifiedReplica.getSignature()));
+                        modifiedReplica.send(unlockCommand);
+                    }
+                    return null;
+                }
+            } catch (Exception e) {
+                return null;
             }
+            locks.put(replica.getSignature(), lock);
             lockedReplicaSet.add(replica);
         }
-        return true;
+        return locks;
     }
 
-    private void unlockKeyOnReplicaSet(String key) {
+    private void unlockKeyOnReplicaSet(String key, Map<String, String> locks) {
         for (Replica replica : replicaRegistry.getReplicaSet(this)) {
             try {
-                replica.send(LockingDataStoreCommands.unlock(key));
+                replica.send(LockingDataStoreCommands.unlock(key, locks.get(replica.getSignature())));
             } catch (Exception e) {
                 throw new ServerException("Failed to unlock key <" + key + "> on replica <" + replica + ">");
             }
         }
     }
 
-    private boolean tryWithRollback(Replica replica, DataStoreCommand<?> command, DataStoreCommand<?> rollback, Set<Replica> replicaSet) {
+    private <R> R tryWithRollback(Replica replica, DataStoreCommand<R> command, DataStoreCommand<?> rollback, Set<Replica> replicaSet) {
         try {
-            replica.send(command);
+            return replica.send(command);
         } catch (Exception e) {
             for (Replica modifiedReplica : replicaSet) {
                 modifiedReplica.send(rollback);
             }
-            return false;
+            throw new ServerException("Failed to work the command " + command, e);
         }
-        return true;
     }
 
     @Override

@@ -41,16 +41,21 @@ public class DataStoreCommandDispatcher {
             return (R) dataStore.all();
         } else if (command instanceof LockingDataStoreCommand<?> && dataStore instanceof LockingDataStore) {
             if (command instanceof LockCommand) {
-                ((LockingDataStore) dataStore).lock(((LockCommand) command).getKey());
-                return null;
+                return (R) ((LockingDataStore) dataStore).lock(((LockCommand) command).getKey());
             } else if (command instanceof UnlockCommand) {
-                ((LockingDataStore) dataStore).unlock(((UnlockCommand) command).getKey());
+                ((LockingDataStore) dataStore).unlock(((UnlockCommand) command).getKey(), ((UnlockCommand) command).getLock());
                 return null;
             } else if (command instanceof RestoreCommand) {
-                ((LockingDataStore) dataStore).restore(((RestoreCommand) command).getKey());
+                ((LockingDataStore) dataStore).restore(((RestoreCommand) command).getKey(), ((RestoreCommand) command).getLock());
                 return null;
             } else if (command instanceof IsLockedCommand) {
                 return (R) (Boolean) ((LockingDataStore) dataStore).locked(((IsLockedCommand) command).getKey());
+            } else if (command instanceof LockedStoreCommand) {
+                return (R) (Boolean) ((LockingDataStore) dataStore).store(((LockedStoreCommand) command).getKey(), ((LockedStoreCommand) command).getValue(), ((LockedStoreCommand) command).getLock());
+            } else if (command instanceof LockedDeleteCommand) {
+                return (R) (Boolean) ((LockingDataStore) dataStore).delete(((LockedDeleteCommand) command).getKey(), ((LockedDeleteCommand) command).getLock());
+            } else if (command instanceof LockedGetCommand) {
+                return (R) ((LockingDataStore) dataStore).get(((LockedGetCommand) command).getKey(), ((LockedGetCommand) command).getLock());
             } else if (command instanceof GetUriCommand) {
                 return (R) ((LockingDataStore) dataStore).getUri(((GetUriCommand) command).getServerConfiguration());
             } else if (command instanceof SignatureCommand) {

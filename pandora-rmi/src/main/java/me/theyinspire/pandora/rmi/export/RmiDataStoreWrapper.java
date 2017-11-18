@@ -112,27 +112,54 @@ public class RmiDataStoreWrapper implements LockingDataStore {
     }
 
     @Override
-    public void lock(String key) {
+    public String lock(String key) {
         try {
-            delegate.lock(key);
+            return delegate.lock(key);
         } catch (RemoteException e) {
             throw new ServerException("RMI transaction failed", e);
         }
     }
 
     @Override
-    public void restore(String key) {
+    public void restore(String key, String lock) {
         try {
-            delegate.restore(key);
+            delegate.restore(key, lock);
         } catch (RemoteException e) {
             throw new ServerException("RMI transaction failed", e);
         }
     }
 
     @Override
-    public void unlock(String key) {
+    public void unlock(String key, String lock) {
         try {
-            delegate.unlock(key);
+            delegate.unlock(key, lock);
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public boolean store(String key, Serializable value, String lock) {
+        try {
+            return delegate.store(key, value, lock);
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public boolean delete(String key, String lock) {
+        try {
+            return delegate.delete(key, lock);
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public Serializable get(String key, String lock) {
+        try {
+            return delegate.get(key, lock);
         } catch (RemoteException e) {
             throw new ServerException("RMI transaction failed", e);
         }
