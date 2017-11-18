@@ -111,12 +111,14 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
             return (R) (Boolean) Boolean.parseBoolean(response);
         } else if (command instanceof AllCommand) {
             final Map<String, Object> map = new HashMap<>();
-            final String[] lines = response.split("\n");
-            for (String line : lines) {
-                line = line.replaceFirst("^key:", "");
-                line = line.substring(0, line.length() - 1);
-                final String[] portions = line.split(":value:");
-                map.put(portions[0], portions[1]);
+            if (!response.isEmpty()) {
+                final String[] lines = response.split("\n");
+                for (String line : lines) {
+                    line = line.replaceFirst("^key:", "");
+                    line = line.substring(0, line.length() - 1);
+                    final String[] portions = line.split(":value:");
+                    map.put(portions[0], portions[1]);
+                }
             }
             return (R) map;
         } else if (command instanceof LockingDataStoreCommand<?>) {
