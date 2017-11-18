@@ -138,7 +138,38 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
 
     @Override
     public boolean delete(String key) {
-        return delegate.delete(key);
+        if (!has(key)) {
+            return false;
+        }
+        final String localLock = lock(key);
+        final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(this);
+        final Map<String, String> locks = new HashMap<>();
+        try {
+            for (Replica replica : replicaSet) {
+                final String lock = replica.send(LockingDataStoreCommands.lock(key));
+                locks.put(replica.getSignature(), lock);
+            }
+            for (Replica replica : replicaSet) {
+                final Boolean deleted = replica.send(LockingDataStoreCommands.delete(key, locks.get(replica.getSignature())));
+                if (!deleted) {
+                    throw new ServerException("Failed to delete <" + key + "> from replica: " + replica);
+                }
+            }
+            for (Replica replica : replicaSet) {
+                replica.send(LockingDataStoreCommands.unlock(key, locks.get(replica.getSignature())));
+            }
+            unlock(key, localLock);
+        } catch (Exception e){
+            for (Replica replica : replicaSet) {
+                if (!locks.containsKey(replica.getSignature())) {
+                    continue;
+                }
+                replica.send(LockingDataStoreCommands.restore(key, locks.get(replica.getSignature())));
+            }
+            restore(key, localLock);
+            throw new ServerException("Failed to delete key across the cluster", e);
+        }
+        return true;
     }
 
     @Override
