@@ -1,5 +1,6 @@
 package me.theyinspire.pandora.cli.impl;
 
+import me.theyinspire.pandora.core.config.Configuration;
 import me.theyinspire.pandora.core.config.ExecutionMode;
 import me.theyinspire.pandora.core.config.ServerExecutionConfiguration;
 import me.theyinspire.pandora.core.config.impl.DefaultDataStoreConfiguration;
@@ -25,8 +26,8 @@ public class DefaultServerExecutionConfiguration extends AbstractExecutionConfig
     private final Map<Protocol, ServerConfiguration> configurations;
     private final DataStoreConfiguration dataStoreConfiguration;
 
-    public DefaultServerExecutionConfiguration(Map<String, String> data) {
-        super(ExecutionMode.SERVER, data);
+    public DefaultServerExecutionConfiguration(Map<String, String> data, Configuration parent) {
+        super(ExecutionMode.SERVER, data, parent);
         configurations = new HashMap<>();
         this.protocols = Collections.unmodifiableList(deduceProtocols());
         this.dataStoreName = deduceDataStoreName();

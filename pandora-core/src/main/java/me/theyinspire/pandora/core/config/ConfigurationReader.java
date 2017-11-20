@@ -8,6 +8,6 @@ import me.theyinspire.pandora.core.error.ConfigurationException;
  */
 public interface ConfigurationReader {
 
-    ExecutionConfiguration read(String... args) throws ConfigurationException;
+    ExecutionConfiguration read(Configuration parent, String... args) throws ConfigurationException;
 
 }

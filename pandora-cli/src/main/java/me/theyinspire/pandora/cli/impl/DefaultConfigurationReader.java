@@ -1,5 +1,6 @@
 package me.theyinspire.pandora.cli.impl;
 
+import me.theyinspire.pandora.core.config.Configuration;
 import me.theyinspire.pandora.core.config.ConfigurationReader;
 import me.theyinspire.pandora.core.config.ExecutionConfiguration;
 import me.theyinspire.pandora.core.config.ExecutionMode;
@@ -15,7 +16,7 @@ import java.util.Map;
 public class DefaultConfigurationReader implements ConfigurationReader {
 
     @Override
-    public ExecutionConfiguration read(String... args) throws ConfigurationException {
+    public ExecutionConfiguration read(Configuration parent, String... args) throws ConfigurationException {
         if (args.length < 1) {
             throw new ConfigurationException("You need to specify an execution mode");
         }
@@ -61,10 +62,10 @@ public class DefaultConfigurationReader implements ConfigurationReader {
         } else {
             command = "";
         }
-        if (ExecutionMode.CLIENT.equals(executionMode)) {
-            return new DefaultClientExecutionConfiguration(config, command);
+        if (ExecutionMode.CLIENT.equals(executionMode) || ExecutionMode.INTERACTIVE.equals(executionMode)) {
+            return new DefaultClientExecutionConfiguration(config, command, parent, executionMode);
         } else if (ExecutionMode.SERVER.equals(executionMode)) {
-            return new DefaultServerExecutionConfiguration(config);
+            return new DefaultServerExecutionConfiguration(config, parent);
         }
         return null;
     }

@@ -91,3 +91,17 @@ on the network internally. This is done via UDP. Your router must allow broadcas
 the beacon port. This can also be used to maintain different sets of replicated data nodes which are unaware of each
 other's pool, since their beacon port is different. Nodes will also let each other know if they are being gracefully
 shut down.
+
+### Locking Methods
+
+The in-memory data store supports two locking mechanisms:
+
+1. Optimistic locking: you can place multiple locks on each key, and conclude them. If the items have been modified by other transactions
+in the meanwhile, your transactions cannot conclude.
+2. Pessimistic locking: you can place a single, exclusive lock on the key, and only the holder of the key can modify the data. This is the
+default locking method.
+
+## Interactive Client
+
+This application comes with an interactive client to ease communication with the server. You can simply run the application as
+`/path/to/launcher interactive [options]` to start an interactive session.

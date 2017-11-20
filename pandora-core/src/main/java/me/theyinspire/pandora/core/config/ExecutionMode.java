@@ -7,6 +7,7 @@ package me.theyinspire.pandora.core.config;
 public enum  ExecutionMode {
 
     CLIENT,
+    INTERACTIVE,
     SERVER
 
 }

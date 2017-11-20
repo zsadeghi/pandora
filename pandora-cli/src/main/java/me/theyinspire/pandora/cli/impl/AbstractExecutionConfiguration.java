@@ -1,5 +1,6 @@
 package me.theyinspire.pandora.cli.impl;
 
+import me.theyinspire.pandora.core.config.Configuration;
 import me.theyinspire.pandora.core.config.ExecutionConfiguration;
 import me.theyinspire.pandora.core.config.ExecutionMode;
 import me.theyinspire.pandora.core.config.impl.AbstractConfiguration;
@@ -14,8 +15,8 @@ public abstract class AbstractExecutionConfiguration extends AbstractConfigurati
 
     private final ExecutionMode mode;
 
-    public AbstractExecutionConfiguration(ExecutionMode mode, Map<String, String> data) {
-        super(data);
+    public AbstractExecutionConfiguration(ExecutionMode mode, Map<String, String> data, Configuration parent) {
+        super(parent, data);
         this.mode = mode;
     }
 

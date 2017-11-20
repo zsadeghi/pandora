@@ -71,16 +71,17 @@ public class DataStoreServlet extends HttpServlet {
 
     private void doDispatch(RequestMethod method, HttpServletRequest request, HttpServletResponse response) {
         final DataStoreCommand<?> command = getCommand(method, request);
+        if (command == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
         final Object result;
         try {
             LOG.info("Executing command: " + command);
             result = dispatcher.dispatch(command);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        if (result == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            LOG.error(e);
             return;
         }
         final ServletOutputStream outputStream;

@@ -4,6 +4,9 @@ import me.theyinspire.pandora.core.config.Configuration;
 import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
 import me.theyinspire.pandora.core.error.ConfigurationException;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (11/16/17, 2:35 PM)
@@ -51,6 +54,11 @@ public abstract class AbstractScopedConfiguration implements Configuration {
     @Override
     public boolean has(String key) {
         return delegate.has(prefix(key));
+    }
+
+    @Override
+    public Set<String> keys() {
+        return delegate.keys().stream().filter(key -> key.startsWith(prefix(""))).collect(Collectors.toSet());
     }
 
 }

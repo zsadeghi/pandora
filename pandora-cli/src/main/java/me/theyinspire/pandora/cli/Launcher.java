@@ -15,6 +15,7 @@ import me.theyinspire.pandora.core.server.Server;
 import me.theyinspire.pandora.core.server.error.ServerException;
 
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
@@ -28,12 +29,11 @@ public class Launcher {
         final DataStoreRegistry dataStoreRegistry = setUpDataStoreRegistry();
         final DefaultConfigurationReader configurationReader = new DefaultConfigurationReader();
         try {
-            final ExecutionConfiguration executionConfiguration = configurationReader.read(args);
+            final ExecutionConfiguration executionConfiguration = configurationReader.read(null, args);
             if (ExecutionMode.CLIENT.equals(executionConfiguration.getExecutionMode())) {
                 final ClientExecutionConfiguration configuration = (ClientExecutionConfiguration) executionConfiguration;
-                final Client client = protocolRegistry.getClient(configuration.getProtocol(), configuration.getClientConfiguration());
-                final String response = client.send(configuration.getCommand());
-                System.out.println(response);
+                final String command = configuration.getCommand();
+                sendCommand(protocolRegistry, configuration, command);
             } else if (ExecutionMode.SERVER.equals(executionConfiguration.getExecutionMode())) {
                 final ServerExecutionConfiguration configuration = (ServerExecutionConfiguration) executionConfiguration;
                 final List<Server> servers = configuration.getProtocols().stream()
@@ -48,6 +48,49 @@ public class Launcher {
                 for (Thread serverThread : serverThreads) {
                     serverThread.join();
                 }
+            } else if (ExecutionMode.INTERACTIVE.equals(executionConfiguration.getExecutionMode())) {
+                ClientExecutionConfiguration currentConfiguration = (ClientExecutionConfiguration) executionConfiguration;
+                System.out.println("Entering interactive mode. Type `/quit` to exit. Type `/help` for more commands.");
+                final Scanner scanner = new Scanner(System.in);
+                while (true) {
+                    System.out.print(currentConfiguration.getProtocol().getName().toLowerCase());
+                    System.out.print("> ");
+                    final String line = scanner.nextLine().trim();
+                    if (line.toLowerCase().equals("/quit")) {
+                        break;
+                    } else if (line.toLowerCase().equals("/help")) {
+                        System.out.println("/quit");
+                        System.out.println("\tExit the interactive mode");
+                        System.out.println("/ls");
+                        System.out.println("\tPrint out the current configuration");
+                        System.out.println("/config [args]");
+                        System.out.println("\tRead the args as configuration parameters, and switch to the new configuration.");
+                        System.out.println("\tThe arguments follow the same pattern as with the normal application usage, without");
+                        System.out.println("\tthe need for <mode> to be specified.");
+                        System.out.println("/usage");
+                        System.out.println("\tPrint out the regular application usage.");
+                        System.out.println("{anything else}");
+                        System.out.println("\tSends out the input as a command to the server");
+                    } else if (line.toLowerCase().equals("/ls")) {
+                        final List<String> keys = currentConfiguration.keys().stream().sorted().collect(Collectors.toList());
+                        for (String key : keys) {
+                            System.out.println(key + " = " + currentConfiguration.get(key));
+                        }
+                    } else if (line.toLowerCase().startsWith("/config ")) {
+                        final String[] newArgs = ("client " + line.substring("config ".length())).split(" ");
+                        currentConfiguration = (ClientExecutionConfiguration) configurationReader.read(currentConfiguration, newArgs);
+                    } else if (line.toLowerCase().equals("/usage")) {
+                        printUsage(protocolRegistry, dataStoreRegistry);
+                    } else {
+                        final String command = line.trim();
+                        try {
+                            sendCommand(protocolRegistry, currentConfiguration, command);
+                        } catch (Exception e) {
+                            printError(e);
+                        }
+                    }
+                }
+                System.out.println("Exiting interactive mode.");
             } else {
                 throw new ConfigurationException("Invalid execution mode: " + executionConfiguration.getExecutionMode());
             }
@@ -61,6 +104,12 @@ public class Launcher {
         } catch (ClientException | ServerException e) {
             printError(e);
         }
+    }
+
+    private static void sendCommand(ProtocolRegistry protocolRegistry, ClientExecutionConfiguration configuration, String command) {
+        final Client client = protocolRegistry.getClient(configuration.getProtocol(), configuration.getClientConfiguration());
+        final String response = client.send(command);
+        System.out.println(response);
     }
 
     private static void loadPropertyClasses(String property) throws ClassNotFoundException {
@@ -126,6 +175,7 @@ public class Launcher {
         System.out.println("\t\tReturns `true` if the data store is empty");
         System.out.println("\ttruncate");
         System.out.println("\t\tDeletes all items from the data store");
+        System.out.println();
         System.out.println("Server mode:");
         System.out.println("To start the application in server mode, you must specify mode as `server`:");
         System.out.println("\t/path/to/launcher server [options]");
@@ -144,6 +194,13 @@ public class Launcher {
         System.out.println("For example:");
         System.out.println("-Dpandora.protocols=my.protocol.package.Loader /path/to/launcher");
         System.out.println("These classes will be loaded in addition to the already supported classes.");
+        System.out.println();
+        System.out.println("Interactive mode:");
+        System.out.println("In interactive mode an initial set of arguments is read from the command line the same");
+        System.out.println("as with the client mode, however, no command is read or executed. Instead, you will be");
+        System.out.println("presented with a REPL which will execute commands against a designated server.");
+        System.out.println("This client can be reconfigured at any point (see /config) to point to a different");
+        System.out.println("server instance.");
         System.out.flush();
     }
 

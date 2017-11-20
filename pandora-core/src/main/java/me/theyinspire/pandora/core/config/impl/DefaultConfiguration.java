@@ -1,5 +1,7 @@
 package me.theyinspire.pandora.core.config.impl;
 
+import me.theyinspire.pandora.core.config.Configuration;
+
 import java.util.Map;
 
 /**
@@ -9,7 +11,11 @@ import java.util.Map;
 public class DefaultConfiguration extends AbstractConfiguration {
 
     public DefaultConfiguration(Map<String, String> data) {
-        super(data);
+        this(data, null);
+    }
+
+    public DefaultConfiguration(Map<String, String> data, Configuration parent) {
+        super(parent, data);
     }
 
 }
