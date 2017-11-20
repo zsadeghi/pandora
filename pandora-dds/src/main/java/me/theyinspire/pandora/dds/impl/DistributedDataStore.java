@@ -45,8 +45,8 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
     }
 
     @Override
-    public void unlock(String key, String unlock) {
-        delegate.unlock(key, unlock);
+    public void unlock(String key, String lock) {
+        delegate.unlock(key, lock);
     }
 
     @Override

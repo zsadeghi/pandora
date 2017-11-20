@@ -16,7 +16,7 @@ public interface LockingDataStore extends DataStore {
 
     void restore(String key, String lock);
 
-    void unlock(String key, String unlock);
+    void unlock(String key, String lock);
 
     boolean store(String key, Serializable value, String lock);
 

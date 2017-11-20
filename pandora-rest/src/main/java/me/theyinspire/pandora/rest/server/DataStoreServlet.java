@@ -5,6 +5,7 @@ import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
+import me.theyinspire.pandora.core.datastore.cmd.LockingDataStoreCommands;
 import me.theyinspire.pandora.core.server.error.ServerException;
 import me.theyinspire.pandora.rest.protocol.RequestMethod;
 import org.apache.commons.logging.Log;
@@ -64,7 +65,7 @@ public class DataStoreServlet extends HttpServlet {
             mapper.writeValue(outputStream, "bye");
             server.stop();
         } else {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            doDispatch(RequestMethod.POST, req, resp);
         }
     }
 
@@ -79,7 +80,6 @@ public class DataStoreServlet extends HttpServlet {
             return;
         }
         if (result == null) {
-            System.err.println("Bad input: " + command);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -108,23 +108,45 @@ public class DataStoreServlet extends HttpServlet {
                     return DataStoreCommands.get(key(url));
                 } else if (url.matches("/data/?")) {
                     return DataStoreCommands.all();
+                } else if (url.matches("/uri/?")) {
+                    return LockingDataStoreCommands.getUri(server.getConfiguration());
+                } else if (url.matches("/signature/?")) {
+                    return LockingDataStoreCommands.signature();
+                } else if (url.matches("/locks/[^/]+/[^/]+/?")) {
+                    return LockingDataStoreCommands.get(lockedKey(url), lock(url));
                 }
                 break;
             case HEAD:
                 if (url.startsWith("/data/")) {
                     return DataStoreCommands.has(key(url));
+                } else if (url.matches("/locks/[^/]+/?")) {
+                    return LockingDataStoreCommands.isLocked(lockedKey(url));
                 }
                 break;
             case PUT:
                 if (url.startsWith("/data/")) {
                     return DataStoreCommands.store(key(url), value(request));
+                } else if (url.matches("/locks/[^/]+/[^/]+/?")) {
+                    return LockingDataStoreCommands.store(lockedKey(url), lock(url), value(request));
                 }
                 break;
             case DELETE:
-                if (url.startsWith("/data/")) {
+                if (url.matches("/data/[^/]+/?")) {
                     return DataStoreCommands.delete(key(url));
                 } else if (url.matches("/data/?")) {
                     return DataStoreCommands.truncate();
+                } else if (url.matches("/locks/[^/]+/[^/]+/?")) {
+                    return LockingDataStoreCommands.delete(lockedKey(url), lock(url));
+                }
+                break;
+            case POST:
+                if (url.matches("/locks/[^/]+/?")) {
+                    final String key = lockedKey(url);
+                    return LockingDataStoreCommands.lock(key);
+                } else if (url.matches("/locks/[^/]+/[^/]+/unlock/?")) {
+                    return LockingDataStoreCommands.unlock(lockedKey(url), lock(url));
+                } else if (url.matches("/locks/[^/]+/[^/]+/restore/?")) {
+                    return LockingDataStoreCommands.restore(lockedKey(url), lock(url));
                 }
                 break;
         }
@@ -147,6 +169,20 @@ public class DataStoreServlet extends HttpServlet {
 
     private String key(String url) {
         return url.substring("/data/".length());
+    }
+
+    private String lockedKey(String url) {
+        url = url.replaceFirst("/$", "");
+        final String substring = url.substring("/locks/".length());
+        final String[] split = substring.split("/");
+        return split[0];
+    }
+
+    private String lock(String url) {
+        url = url.replaceFirst("/$", "");
+        final String substring = url.substring("/locks/".length());
+        final String[] split = substring.split("/");
+        return split[1];
     }
 
 }

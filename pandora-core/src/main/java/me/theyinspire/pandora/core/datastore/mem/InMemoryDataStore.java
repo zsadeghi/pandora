@@ -47,8 +47,8 @@ public class InMemoryDataStore implements LockingDataStore {
     }
 
     @Override
-    public void unlock(String key, String unlock) {
-        lockKeeper.unlock(key, unlock);
+    public void unlock(String key, String lock) {
+        lockKeeper.unlock(key, lock);
     }
 
     @Override

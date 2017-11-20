@@ -7,7 +7,8 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.HttpRequest;
 import com.mashape.unirest.request.HttpRequestWithBody;
 import me.theyinspire.pandora.core.client.error.ClientException;
-import me.theyinspire.pandora.core.datastore.DataStore;
+import me.theyinspire.pandora.core.datastore.LockingDataStore;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.rest.protocol.RequestMethod;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (11/11/17, 8:19 PM)
  */
-public class DataStoreClient implements DataStore {
+public class DataStoreClient implements LockingDataStore {
 
     private final String prefix;
 
@@ -80,6 +81,51 @@ public class DataStoreClient implements DataStore {
     public Map<String, Serializable> all() {
         //noinspection unchecked
         return execute(Map.class, RequestMethod.GET, "/data");
+    }
+
+    @Override
+    public String getUri(ServerConfiguration configuration) {
+        return execute(String.class, RequestMethod.GET, "/uri");
+    }
+
+    @Override
+    public String lock(String key) {
+        return execute(String.class, RequestMethod.POST, "/locks/" + key);
+    }
+
+    @Override
+    public void restore(String key, String lock) {
+        execute(String.class, RequestMethod.POST, "/locks/" + key + "/" + lock + "/restore");
+    }
+
+    @Override
+    public void unlock(String key, String lock) {
+        execute(String.class, RequestMethod.POST, "/locks/" + key + "/" + lock + "/unlock");
+    }
+
+    @Override
+    public boolean store(String key, Serializable value, String lock) {
+        return execute(Boolean.class, RequestMethod.PUT, "/locks/" + key + "/" + lock, value);
+    }
+
+    @Override
+    public boolean delete(String key, String lock) {
+        return execute(Boolean.class, RequestMethod.DELETE, "/locks/" + key + "/" + lock);
+    }
+
+    @Override
+    public Serializable get(String key, String lock) {
+        return execute(String.class, RequestMethod.GET, "/locks/" + key + "/" + lock);
+    }
+
+    @Override
+    public boolean locked(String key) {
+        return execute(Boolean.class, RequestMethod.HEAD, "/locks/" + key);
+    }
+
+    @Override
+    public String getSignature() {
+        return execute(String.class, RequestMethod.GET, "/signature");
     }
 
     public String exit() {
