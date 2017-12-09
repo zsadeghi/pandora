@@ -11,6 +11,6 @@ import me.theyinspire.pandora.core.client.ClientFactory;
 public class RmiClientFactory implements ClientFactory {
     @Override
     public Client getInstance(ClientConfiguration configuration) {
-        return new RmiClient(configuration, configuration.getHost(), configuration.get("instance", "dataStore"));
+        return new RmiClient(configuration, configuration.getHost(), configuration.require("instance"));
     }
 }
