@@ -111,7 +111,7 @@ public class BeaconReplicaRegistry extends AbstractReplicaRegistry {
 
     private static class BeaconTransmitter implements Runnable {
 
-        public static final String BROADCAST_ADDRESS = "255.255.255.255";
+        public static final String BROADCAST_ADDRESS = "0.0.0.0";
         private final AtomicBoolean running = new AtomicBoolean(true);
         private final String signature;
         private final String uri;
