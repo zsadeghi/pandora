@@ -16,6 +16,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -28,16 +29,27 @@ public class RmiServer implements Server {
     private final ServerConfiguration configuration;
     private String name;
     private final DataStore dataStore;
+    private final AtomicBoolean stopped;
 
     public RmiServer(ServerConfiguration configuration, DataStore dataStore, int port) {
         this(configuration, dataStore, "dataStore", port);
     }
 
     public RmiServer(ServerConfiguration configuration, DataStore dataStore, String name, int port) {
+        configuration.getShutdownHooks().add(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                LOG.error("Failed to wait for a graceful shutdown. Exiting now.");
+                System.exit(1);
+            }
+            System.exit(0);
+        });
         this.configuration = configuration;
         this.port = port;
         this.name = name;
         this.dataStore = dataStore;
+        stopped = new AtomicBoolean(false);
     }
 
     @Override
@@ -75,6 +87,10 @@ public class RmiServer implements Server {
 
     @Override
     public void stop() throws ServerException {
+        if (stopped.get()) {
+            return;
+        }
+        stopped.set(true);
         LOG.info("Initiating shutdown sequence");
         final Registry registry;
         try {

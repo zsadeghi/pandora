@@ -47,7 +47,7 @@ public class DefaultServerExecutionConfiguration extends AbstractExecutionConfig
         if (dataStore instanceof DestroyableDataStore) {
             DestroyableDataStore store = (DestroyableDataStore) dataStore;
             for (Protocol protocol : protocols) {
-                shutdownHooks.get(protocol.getName()).add(() -> ((DestroyableDataStore) dataStore).destroy(getServerConfiguration(protocol)));
+                shutdownHooks.get(protocol.getName()).add(() -> store.destroy(getServerConfiguration(protocol)));
             }
         }
     }

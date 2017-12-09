@@ -6,7 +6,6 @@ import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -57,7 +56,7 @@ public class DefaultServerConfiguration extends AbstractScopedConfiguration impl
 
     @Override
     public List<Runnable> getShutdownHooks() {
-        return Collections.unmodifiableList(shutdownHooks);
+        return shutdownHooks;
     }
 
 }

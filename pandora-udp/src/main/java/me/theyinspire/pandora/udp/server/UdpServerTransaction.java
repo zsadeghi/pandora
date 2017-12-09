@@ -36,12 +36,20 @@ public class UdpServerTransaction implements ServerTransaction<UdpIncoming, UdpO
 
     @Override
     public void send(UdpOutgoing reply) throws CommunicationException {
-        final byte[] buffer = reply.getContent().getBytes();
-        final DatagramPacket packet = new DatagramPacket(buffer, reply.getContent().length(), reply.getAddress(), reply.getPort());
-        try {
-            socket.send(packet);
-        } catch (IOException e) {
-            throw new IOCommunicationException("Failed to send datagram packet", e);
+        final byte[] content = reply.getContent().concat("\0\0\0\0\0").getBytes();
+        int sent = 0;
+        int toSend = 0;
+        final byte[] buffer = new byte[BUFFER_SIZE];
+        while (sent < content.length) {
+            toSend = Math.min(content.length - sent, BUFFER_SIZE);
+            System.arraycopy(content, sent, buffer, 0, toSend);
+            sent += toSend;
+            final DatagramPacket packet = new DatagramPacket(buffer, toSend, reply.getAddress(), reply.getPort());
+            try {
+                socket.send(packet);
+            } catch (IOException e) {
+                throw new IOCommunicationException("Failed to send datagram packet", e);
+            }
         }
     }
 

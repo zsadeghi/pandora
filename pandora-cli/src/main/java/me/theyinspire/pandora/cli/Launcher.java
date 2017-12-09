@@ -77,7 +77,7 @@ public class Launcher {
                             System.out.println(key + " = " + currentConfiguration.get(key));
                         }
                     } else if (line.toLowerCase().startsWith("/config ")) {
-                        final String[] newArgs = ("client " + line.substring("config ".length())).split(" ");
+                        final String[] newArgs = ("client " + line.substring("/config ".length())).split(" ");
                         currentConfiguration = (ClientExecutionConfiguration) configurationReader.read(currentConfiguration, newArgs);
                     } else if (line.toLowerCase().equals("/usage")) {
                         printUsage(protocolRegistry, dataStoreRegistry);

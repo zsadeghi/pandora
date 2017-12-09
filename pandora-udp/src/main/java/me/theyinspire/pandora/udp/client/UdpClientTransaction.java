@@ -38,14 +38,23 @@ public class UdpClientTransaction implements ClientTransaction<UdpProtocol> {
 
     @Override
     public String receive() {
-        final DatagramPacket packet = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
-        try {
-            socket.receive(packet);
-        } catch (IOException e) {
-            throw new IOCommunicationException("Failed to receive data from the server", e);
+        final StringBuilder response = new StringBuilder();
+        while (true) {
+            final DatagramPacket packet = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
+            try {
+                socket.receive(packet);
+            } catch (IOException e) {
+                throw new IOCommunicationException("Failed to receive data from the server", e);
+            }
+            final byte[] data = packet.getData();
+            final String current = new String(data, 0, packet.getLength());
+            response.append(current);
+            if (response.length() < 5 || response.substring(response.length() - 5).equals("\0\0\0\0\0")) {
+                break;
+            }
         }
-        final byte[] data = packet.getData();
-        return new String(data, 0, packet.getLength());
+        response.delete(response.length() - 5, response.length());
+        return response.toString();
     }
 
     @Override

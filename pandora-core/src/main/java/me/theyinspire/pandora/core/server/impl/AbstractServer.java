@@ -65,6 +65,17 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
                 stop();
                 continue;
             }
+            if ("test".equalsIgnoreCase(received.getContent())) {
+                final StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < 100; i++) {
+                    builder.append(i + 1)
+                           .append(" - all work and no play makes Jack a dull boy")
+                           .append("\n");
+                }
+                transaction.send(compose(received, builder.toString()));
+                transaction.close();
+                continue;
+            }
             final Command<?> command = deserializeCommand(received.getContent());
             getLog().debug("Scheduling command " + command);
             if (command instanceof DataStoreCommand<?>) {
@@ -83,6 +94,9 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
                     transaction.close();
                     getLog().debug("Transaction closed");
                 });
+            } else {
+                transaction.send(compose(received, "Invalid command: " + received.getContent()));
+                transaction.close();
             }
         }
     }
@@ -99,7 +113,11 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
     }
 
     private Command<?> deserializeCommand(String command) {
-        return deserializer.deserializeCommand(command, configuration);
+        try {
+            return deserializer.deserializeCommand(command, configuration);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String serializeResponse(Command<?> command, Object reply) {
