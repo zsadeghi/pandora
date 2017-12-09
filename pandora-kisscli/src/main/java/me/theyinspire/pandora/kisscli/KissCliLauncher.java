@@ -36,6 +36,9 @@ public class KissCliLauncher {
         } else if (mode == 'c') {
             // client mode
             actualArgs = getClientArgs(protocol, args);
+        } else if (args[0].equals("@")) {
+            actualArgs = new String[args.length - 1];
+            System.arraycopy(args, 1, actualArgs, 0, actualArgs.length);
         } else {
             usageError();
             return;
