@@ -82,7 +82,8 @@ public class DataStoreCommandSerializer implements CommandSerializer {
             if (Boolean.TRUE.equals(response)) {
                 serialized = String.format("delete key=%s", ((DeleteCommand) command).getKey());
             } else {
-                serialized = "error: could not delete the data from the store";
+                serialized = "error: could not delete the data from the store (" + ((DeleteCommand) command).getKey()
+                        + ")";
             }
         } else if (command instanceof AllCommand) {
             final StringBuilder builder = new StringBuilder();
@@ -127,7 +128,8 @@ public class DataStoreCommandSerializer implements CommandSerializer {
             if (Boolean.TRUE.equals(response)) {
                 serialized = String.format("delete key=%s", ((LockedDeleteCommand) command).getKey());
             } else {
-                serialized = "error: could not delete the data from the store";
+                serialized = "error: could not delete the data from the store (" + ((LockedDeleteCommand) command).getKey()
+                        + ")";
             }
         } else {
             throw new IllegalStateException();

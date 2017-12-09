@@ -48,6 +48,11 @@ public class TcpServerTransaction implements ServerTransaction<SimpleIncoming, S
     }
 
     @Override
+    public SimpleIncoming empty() {
+        return new SimpleIncoming(null);
+    }
+
+    @Override
     public void send(SimpleOutgoing outgoing) throws CommunicationException {
         protocol.getWriter().writeAndClose(getOutputStream(), outgoing.getContent());
     }

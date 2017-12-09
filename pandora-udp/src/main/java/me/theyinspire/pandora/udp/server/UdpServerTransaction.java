@@ -35,6 +35,11 @@ public class UdpServerTransaction implements ServerTransaction<UdpIncoming, UdpO
     }
 
     @Override
+    public UdpIncoming empty() {
+        return new UdpIncoming(null, null, 0);
+    }
+
+    @Override
     public void send(UdpOutgoing reply) throws CommunicationException {
         final byte[] content = reply.getContent().concat("\0\0\0\0\0").getBytes();
         int sent = 0;

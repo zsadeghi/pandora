@@ -9,6 +9,7 @@ import me.theyinspire.pandora.core.cmd.impl.DefaultErrorSerializer;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
+import me.theyinspire.pandora.core.error.CommunicationException;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.server.*;
 import me.theyinspire.pandora.core.server.error.ServerException;
@@ -23,6 +24,7 @@ import java.util.concurrent.Executors;
  */
 public abstract class AbstractServer<P extends Protocol, I extends Incoming, O extends Outgoing, T extends ServerTransaction<I, O>, S extends ServerSession<P, T>> implements Server {
 
+    @SuppressWarnings("WeakerAccess")
     public static final int BACKLOG = Runtime.getRuntime().availableProcessors();
     private final ExecutorService executor;
     private final DataStoreCommandDispatcher dispatcher;
@@ -57,7 +59,15 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
             getLog().info("Waiting for a transaction");
             final T transaction = session.startTransaction();
             getLog().debug("Transaction started. Receiving data.");
-            final I received = transaction.receive();
+            final I received;
+            try {
+                received = transaction.receive();
+            } catch (CommunicationException e) {
+                getLog().error(e);
+                transaction.send(compose(transaction.empty(), "Error while reading input"));
+                transaction.close();
+                continue;
+            }
             if ("exit".equalsIgnoreCase(received.getContent())) {
                 getLog().info("Exit sequence started.");
                 transaction.send(compose(received, "bye"));

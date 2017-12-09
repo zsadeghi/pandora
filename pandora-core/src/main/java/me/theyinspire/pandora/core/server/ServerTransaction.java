@@ -10,6 +10,8 @@ public interface ServerTransaction<I extends Incoming, O extends Outgoing> {
 
     I receive() throws CommunicationException;
 
+    I empty();
+
     void send(O reply) throws CommunicationException;
 
     void close() throws CommunicationException;

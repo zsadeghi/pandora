@@ -67,15 +67,15 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
             case SIGNATURE:
                 return LockingDataStoreCommands.signature();
             case GET:
-                return DataStoreCommands.get(reader.rest().trim());
+                return DataStoreCommands.get(reader.rest().trim().split("\\s+")[0]);
             case DEL:
-                return DataStoreCommands.delete(reader.rest().trim());
+                return DataStoreCommands.delete(reader.rest().trim().split("\\s+")[0]);
             case PUT:
                 return DataStoreCommands.store(readWord(reader), reader.rest().trim());
             case XGET:
                 return LockingDataStoreCommands.get(readWord(reader), reader.rest().trim());
             case XDEL:
-                return LockingDataStoreCommands.delete(readWord(reader), reader.rest().trim());
+                return LockingDataStoreCommands.delete(readWord(reader), reader.rest().trim().split("\\s+")[0]);
             case XPUT:
                 return LockingDataStoreCommands.store(readWord(reader), readWord(reader), reader.rest().trim());
         }

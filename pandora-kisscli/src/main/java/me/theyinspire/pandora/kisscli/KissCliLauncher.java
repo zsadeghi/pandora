@@ -72,6 +72,7 @@ public class KissCliLauncher {
                     "server",
                     "--data-store=dds",
                     "--ds-dds-discovery=beacon",
+                    "--ds-memory-locking=optimistic",
                     "--protocols=tcp,udp",
                     "--tcp-port=" + args[1],
                     "--udp-port=" + args[2]
@@ -82,6 +83,7 @@ public class KissCliLauncher {
                     "server",
                     "--data-store=dds",
                     "--ds-dds-discovery=beacon",
+                    "--ds-memory-locking=optimistic",
                     "--protocols=tcp,udp,rmi",
                     "--tcp-port=" + args[1],
                     "--udp-port=" + args[2]
@@ -91,6 +93,7 @@ public class KissCliLauncher {
                 "server",
                 "--data-store=dds",
                 "--ds-dds-discovery=beacon",
+                "--ds-memory-locking=optimistic",
                 "--protocols=" + protocol,
                 "--" + protocol + "-port=" + (protocol.equals("rmi") ? "9090" : args[1])
         };
