@@ -25,7 +25,7 @@ public class InMemoryDataStore implements LockingDataStore {
     private final String signature;
 
     public InMemoryDataStore(int initialCapacity, LockingMethod locking) {
-        storage = new HashMap<>();
+        storage = new HashMap<>(initialCapacity);
         lockKeeper = LockingMethod.OPTIMISTIC.equals(locking) ? new OptimisticLockKeeper(storage) : new PessimisticLockKeeper(storage);
         configurationWriter = new DefaultUriServerConfigurationWriter();
         signature = UUID.randomUUID().toString();

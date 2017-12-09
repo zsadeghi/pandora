@@ -70,6 +70,8 @@ public class KissCliLauncher {
         if (protocol.equals("tcp/udp")) {
             return new String[]{
                     "server",
+                    "--data-store=dds",
+                    "--ds-dds-discovery=beacon",
                     "--protocols=tcp,udp",
                     "--tcp-port=" + args[1],
                     "--udp-port=" + args[2]
@@ -78,6 +80,8 @@ public class KissCliLauncher {
         if (protocol.equals("all")) {
             return new String[]{
                     "server",
+                    "--data-store=dds",
+                    "--ds-dds-discovery=beacon",
                     "--protocols=tcp,udp,rmi",
                     "--tcp-port=" + args[1],
                     "--udp-port=" + args[2]
@@ -85,6 +89,8 @@ public class KissCliLauncher {
         }
         return new String[]{
                 "server",
+                "--data-store=dds",
+                "--ds-dds-discovery=beacon",
                 "--protocols=" + protocol,
                 "--" + protocol + "-port=" + (protocol.equals("rmi") ? "9090" : args[1])
         };

@@ -104,7 +104,7 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
     @Override
     public void stop() {
         if (!running) {
-            throw new ServerException("Server is not running");
+            return;
         }
         getLog().info("Shutting down the server.");
         running = false;
