@@ -138,7 +138,7 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 return null;
             }
         }
-        return (R) UNKNOWN;
+        throw new IllegalStateException();
     }
 
 }

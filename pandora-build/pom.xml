@@ -18,6 +18,7 @@
         <module>../pandora-rest</module>
         <module>../pandora-kisscli</module>
         <module>../pandora-dds</module>
+        <module>../pandora-raft</module>
     </modules>
 
     <properties>

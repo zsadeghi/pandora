@@ -22,7 +22,9 @@ public class AggregateCommandSerializer implements CommandSerializer {
     private final Map<Class<? extends Command>, CommandSerializer> serializers;
 
     private AggregateCommandSerializer() {
-        final List<CommandSerializer> serializers = Arrays.asList(new DataStoreCommandSerializer());
+        final List<CommandSerializer> serializers = Arrays.asList(
+                new DataStoreCommandSerializer(),
+                new CommandWithArgumentSerializer());
         this.serializers = new HashMap<>();
         accepts = new ArrayList<>();
         for (CommandSerializer serializer : serializers) {

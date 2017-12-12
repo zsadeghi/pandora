@@ -23,7 +23,8 @@ public class AggregateCommandDeserializer implements CommandDeserializer {
     private final List<CommandDeserializer> deserializers;
 
     private AggregateCommandDeserializer() {
-        this.deserializers = Arrays.asList(new DataStoreCommandDeserializer());
+        this.deserializers = Arrays.asList(new DataStoreCommandDeserializer(),
+                new CommandWithArgumentDeserializer());
     }
 
     @Override
@@ -40,10 +41,13 @@ public class AggregateCommandDeserializer implements CommandDeserializer {
     @Override
     public <R> R deserializeResponse(Command<R> command, String response) {
         for (CommandDeserializer deserializer : deserializers) {
-            final R deserializedResponse = deserializer.deserializeResponse(command, response);
-            if (deserializedResponse != UNKNOWN) {
-                return deserializedResponse;
+            final R deserializedResponse;
+            try {
+                deserializedResponse = deserializer.deserializeResponse(command, response);
+            } catch (IllegalStateException e) {
+                continue;
             }
+            return deserializedResponse;
         }
         return null;
     }
