@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class Launcher {
 
     public static void main(String[] args) throws Exception {
-        args = "interactive".split(" ");
         final ProtocolRegistry protocolRegistry = setUpProtocolRegistry();
         final DataStoreRegistry dataStoreRegistry = setUpDataStoreRegistry();
         final DefaultConfigurationReader configurationReader = new DefaultConfigurationReader();

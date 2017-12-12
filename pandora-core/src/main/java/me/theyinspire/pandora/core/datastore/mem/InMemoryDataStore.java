@@ -1,5 +1,7 @@
 package me.theyinspire.pandora.core.datastore.mem;
 
+import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.datastore.CommandReceiver;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.UriServerConfigurationWriter;
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (10/26/17, 6:11 PM)
  */
-public class InMemoryDataStore implements LockingDataStore {
+public class InMemoryDataStore implements LockingDataStore, CommandReceiver {
 
     private final Map<String, Entry> storage;
     private final LockKeeper lockKeeper;
@@ -161,6 +163,26 @@ public class InMemoryDataStore implements LockingDataStore {
 
     private boolean isExclusivelyLocked(String key) {
         return lockKeeper.isLocked(key) && lockKeeper.isExclusive();
+    }
+
+    @Override
+    public String receive(final CommandWithArguments command) {
+        if ("test".equals(command.getCommand())) {
+            final int count;
+            if (command.getArguments().size() > 0 && command.getArguments().get(0).matches("\\d+")) {
+                count = Integer.parseInt(command.getArguments().get(0));
+            } else {
+                count = 100;
+            }
+            final StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < count; i++) {
+                builder.append(i + 1)
+                       .append(" - all work and no play makes Jack a dull boy")
+                       .append("\n");
+            }
+            return builder.toString();
+        }
+        throw new IllegalArgumentException();
     }
 
     private static class Entry {

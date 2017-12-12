@@ -8,7 +8,6 @@ import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
-import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
 import me.theyinspire.pandora.rmi.export.RmiDataStore;
 import me.theyinspire.pandora.rmi.export.RmiDataStoreWrapper;
@@ -69,12 +68,7 @@ public class RmiClient implements Client {
             }
         }
         final Command<?> command = deserializer.deserializeCommand(content, null);
-        final Object result;
-        if (command instanceof DataStoreCommand<?>) {
-            result = dispatcher.dispatch((DataStoreCommand<?>) command);
-        } else {
-            result = CommandDeserializer.UNKNOWN;
-        }
+        final Object result = dispatcher.dispatch(command);
         return serializer.serializeResponse(command, result);
     }
 

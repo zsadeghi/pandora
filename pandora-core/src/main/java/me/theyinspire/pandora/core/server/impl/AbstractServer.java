@@ -7,7 +7,6 @@ import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.DefaultErrorSerializer;
 import me.theyinspire.pandora.core.datastore.DataStore;
-import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
 import me.theyinspire.pandora.core.error.CommunicationException;
 import me.theyinspire.pandora.core.protocol.Protocol;
@@ -75,39 +74,23 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
                 stop();
                 continue;
             }
-            if ("test".equalsIgnoreCase(received.getContent())) {
-                final StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < 100; i++) {
-                    builder.append(i + 1)
-                           .append(" - all work and no play makes Jack a dull boy")
-                           .append("\n");
-                }
-                transaction.send(compose(received, builder.toString()));
-                transaction.close();
-                continue;
-            }
             final Command<?> command = deserializeCommand(received.getContent());
             getLog().debug("Scheduling command " + command);
-            if (command instanceof DataStoreCommand<?>) {
-                executor.submit(() -> {
-                    String serialized;
-                    try {
-                        getLog().info("Executing data store command: " + command);
-                        final Object result = dispatcher.dispatch((DataStoreCommand<?>) command);
-                        serialized = serializeResponse(command, result);
-                    } catch (Exception e) {
-                        serialized = "error occurred: " + DefaultErrorSerializer.getInstance().serialize(e);
-                    }
-                    O reply = compose(received, serialized);
-                    getLog().debug("Responding to the query.");
-                    transaction.send(reply);
-                    transaction.close();
-                    getLog().debug("Transaction closed");
-                });
-            } else {
-                transaction.send(compose(received, "Invalid command: " + received.getContent()));
+            executor.submit(() -> {
+                String serialized;
+                try {
+                    getLog().info("Executing data store command: " + command);
+                    final Object result = dispatcher.dispatch(command);
+                    serialized = serializeResponse(command, result);
+                } catch (Exception e) {
+                    serialized = "error occurred: " + DefaultErrorSerializer.getInstance().serialize(e);
+                }
+                O reply = compose(received, serialized);
+                getLog().debug("Responding to the query.");
+                transaction.send(reply);
                 transaction.close();
-            }
+                getLog().debug("Transaction closed");
+            });
         }
     }
 

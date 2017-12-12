@@ -1,5 +1,8 @@
 package me.theyinspire.pandora.core.datastore.cmd;
 
+import me.theyinspire.pandora.core.cmd.Command;
+import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.datastore.CommandReceiver;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 
@@ -16,7 +19,10 @@ public class DataStoreCommandDispatcher {
     }
 
     @SuppressWarnings("unchecked")
-    public <R> R dispatch(DataStoreCommand<R> command) {
+    public <R> R dispatch(Command<R> command) {
+        if (command instanceof CommandWithArguments && dataStore instanceof CommandReceiver) {
+            return (R) ((CommandReceiver) dataStore).receive((CommandWithArguments) command);
+        }
         if (command instanceof SizeCommand) {
             return (R) (Long) dataStore.size();
         } else if (command instanceof IsEmptyCommand) {

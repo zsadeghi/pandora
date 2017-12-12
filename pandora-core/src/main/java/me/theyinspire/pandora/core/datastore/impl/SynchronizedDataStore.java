@@ -1,5 +1,6 @@
 package me.theyinspire.pandora.core.datastore.impl;
 
+import me.theyinspire.pandora.core.cmd.CommandWithArguments;
 import me.theyinspire.pandora.core.datastore.*;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 
@@ -11,7 +12,7 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (10/26/17, 6:25 PM)
  */
-public class SynchronizedDataStore implements LockingDataStore, InitializingDataStore, DestroyableDataStore {
+public class SynchronizedDataStore implements LockingDataStore, InitializingDataStore, DestroyableDataStore, CommandReceiver {
 
     private final DataStore delegate;
 
@@ -142,6 +143,15 @@ public class SynchronizedDataStore implements LockingDataStore, InitializingData
         if (delegate instanceof DestroyableDataStore) {
             ((DestroyableDataStore) delegate).destroy(serverConfiguration);
         }
+    }
+
+    @Override
+    public String receive(final CommandWithArguments command) {
+        if (delegate instanceof CommandReceiver) {
+            CommandReceiver receiver = (CommandReceiver) delegate;
+            return receiver.receive(command);
+        }
+        return null;
     }
 
 }

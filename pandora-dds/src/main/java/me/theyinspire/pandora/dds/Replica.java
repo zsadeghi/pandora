@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.dds;
 
-import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
+import me.theyinspire.pandora.core.cmd.Command;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -10,6 +10,6 @@ public interface Replica {
 
     String getSignature();
 
-    <R> R send(DataStoreCommand<R> command);
+    <R> R send(Command<R> command);
 
 }

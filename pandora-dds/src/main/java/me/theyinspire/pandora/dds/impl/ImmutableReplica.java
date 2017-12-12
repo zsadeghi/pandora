@@ -2,11 +2,11 @@ package me.theyinspire.pandora.dds.impl;
 
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
+import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
-import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.dds.Replica;
 
 /**
@@ -34,7 +34,7 @@ public class ImmutableReplica implements Replica {
     }
 
     @Override
-    public <R> R send(DataStoreCommand<R> command) {
+    public <R> R send(Command<R> command) {
         final String serializedCommand = serializer.serializeCommand(command);
         final String response = client.send(serializedCommand);
         final Object result = deserializer.deserializeResponse(command, response);

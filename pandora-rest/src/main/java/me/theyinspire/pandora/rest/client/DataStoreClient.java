@@ -7,6 +7,8 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.HttpRequest;
 import com.mashape.unirest.request.HttpRequestWithBody;
 import me.theyinspire.pandora.core.client.error.ClientException;
+import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.datastore.CommandReceiver;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.rest.protocol.RequestMethod;
@@ -20,7 +22,7 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (11/11/17, 8:19 PM)
  */
-public class DataStoreClient implements LockingDataStore {
+public class DataStoreClient implements LockingDataStore, CommandReceiver {
 
     private final String prefix;
 
@@ -51,7 +53,10 @@ public class DataStoreClient implements LockingDataStore {
 
     private String cleanUpString(String response) {
         if (response.matches("\".*?\"")) {
-            response = response.substring(1, response.length() - 1);
+            response = response.substring(1, response.length() - 1)
+                               .replaceAll("\\\\n", "\n")
+                               .replaceAll("\\\\r", "\r")
+                               .replaceAll("\\\\t", "\t");
         }
         return response;
     }
@@ -130,6 +135,12 @@ public class DataStoreClient implements LockingDataStore {
 
     public String exit() {
         return cleanUpString(execute(String.class, RequestMethod.POST, "/shutdown"));
+    }
+
+    @Override
+    public String receive(final CommandWithArguments command) {
+        return cleanUpString(
+                execute(String.class, RequestMethod.POST, "/commands/" + command.getCommand(), command.getArguments()));
     }
 
     private <T> T execute(Class<T> type, RequestMethod method, String path) {

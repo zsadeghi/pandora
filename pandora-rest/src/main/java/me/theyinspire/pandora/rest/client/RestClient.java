@@ -9,7 +9,6 @@ import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
-import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
 
 /**
@@ -48,14 +47,10 @@ public class RestClient implements Client {
         }
         final Command<?> command = deserializer.deserializeCommand(content, null);
         final Object result;
-        if (command instanceof DataStoreCommand<?>) {
-            try {
-                result = dispatcher.dispatch((DataStoreCommand<?>) command);
-            } catch (Exception e) {
-                throw new ClientException("Failed to send the request to the server", e);
-            }
-        } else {
-            result = CommandDeserializer.UNKNOWN;
+        try {
+            result = dispatcher.dispatch(command);
+        } catch (Exception e) {
+            throw new ClientException("Failed to send the request to the server", e);
         }
         return serializer.serializeResponse(command, result);
     }
