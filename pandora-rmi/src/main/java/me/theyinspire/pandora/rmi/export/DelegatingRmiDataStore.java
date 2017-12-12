@@ -1,5 +1,7 @@
 package me.theyinspire.pandora.rmi.export;
 
+import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.datastore.CommandReceiver;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
@@ -132,5 +134,15 @@ public class DelegatingRmiDataStore implements RmiDataStore {
         }
         return null;
     }
+
+    @Override
+    public String receive(final CommandWithArguments command) throws RemoteException {
+        if (delegate instanceof CommandReceiver) {
+            CommandReceiver receiver = (CommandReceiver) delegate;
+            return receiver.receive(command);
+        }
+        return null;
+    }
+
 
 }

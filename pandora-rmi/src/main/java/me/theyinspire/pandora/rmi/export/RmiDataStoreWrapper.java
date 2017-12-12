@@ -1,5 +1,7 @@
 package me.theyinspire.pandora.rmi.export;
 
+import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.datastore.CommandReceiver;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.error.ServerException;
@@ -13,7 +15,7 @@ import java.util.Set;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (10/29/17, 2:58 PM)
  */
-public class RmiDataStoreWrapper implements LockingDataStore {
+public class RmiDataStoreWrapper implements LockingDataStore, CommandReceiver {
 
     private final RmiDataStore delegate;
 
@@ -178,6 +180,15 @@ public class RmiDataStoreWrapper implements LockingDataStore {
     public String getSignature() {
         try {
             return delegate.getSignature();
+        } catch (RemoteException e) {
+            throw new ServerException("RMI transaction failed", e);
+        }
+    }
+
+    @Override
+    public String receive(final CommandWithArguments command) {
+        try {
+            return delegate.receive(command);
         } catch (RemoteException e) {
             throw new ServerException("RMI transaction failed", e);
         }
