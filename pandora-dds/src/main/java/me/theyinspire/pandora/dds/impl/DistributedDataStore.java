@@ -158,7 +158,12 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
             for (Replica replica : replicaSet) {
                 replica.send(LockingDataStoreCommands.unlock(key, locks.get(replica.getSignature())));
             }
-            unlock(key, localLock);
+            if (localLock != null) {
+                delete(key, localLock);
+                unlock(key, localLock);
+            } else {
+                delegate.delete(key);
+            }
         } catch (Exception e){
             for (Replica replica : replicaSet) {
                 if (!locks.containsKey(replica.getSignature())) {
