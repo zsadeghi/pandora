@@ -54,6 +54,10 @@ public class Launcher {
                 final Scanner scanner = new Scanner(System.in);
                 while (true) {
                     System.out.print(currentConfiguration.getProtocol().getName().toLowerCase());
+                    System.out.print("://");
+                    System.out.print(currentConfiguration.getClientConfiguration().getHost().toLowerCase());
+                    System.out.print(":");
+                    System.out.print(currentConfiguration.getClientConfiguration().getPort());
                     System.out.print("> ");
                     final String line = scanner.nextLine().trim();
                     if (line.toLowerCase().equals("/quit")) {

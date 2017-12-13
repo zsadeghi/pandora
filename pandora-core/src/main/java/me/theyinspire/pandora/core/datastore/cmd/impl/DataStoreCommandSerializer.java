@@ -5,10 +5,7 @@ import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.datastore.cmd.*;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -18,7 +15,8 @@ public class DataStoreCommandSerializer implements CommandSerializer {
 
     @Override
     public List<Class<? extends Command>> accepts() {
-        return Collections.singletonList(DataStoreCommand.class);
+        return Arrays.asList(DataStoreCommand.class,
+                             LockingDataStoreCommand.class);
     }
 
     @Override
