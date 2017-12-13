@@ -23,15 +23,24 @@ public class UdpServerTransaction implements ServerTransaction<UdpIncoming, UdpO
 
     @Override
     public UdpIncoming receive() throws CommunicationException {
-        final byte[] buffer = new byte[BUFFER_SIZE];
-        final DatagramPacket packet = new DatagramPacket(buffer, BUFFER_SIZE);
-        try {
-            socket.receive(packet);
-        } catch (IOException e) {
-            throw new IOCommunicationException("Failed to receive datagram packet", e);
+        final StringBuilder response = new StringBuilder();
+        DatagramPacket packet;
+        while (true) {
+            packet = new DatagramPacket(new byte[BUFFER_SIZE], BUFFER_SIZE);
+            try {
+                socket.receive(packet);
+            } catch (IOException e) {
+                throw new IOCommunicationException("Failed to receive data from the server", e);
+            }
+            final byte[] data = packet.getData();
+            final String current = new String(data, 0, packet.getLength());
+            response.append(current);
+            if (response.length() < 5 || response.substring(response.length() - 5).equals("\0\0\0\0\0")) {
+                break;
+            }
         }
-        final byte[] data = packet.getData();
-        return new UdpIncoming(new String(data, 0, packet.getLength()), packet.getAddress(), packet.getPort());
+        response.delete(response.length() - 5, response.length());
+        return new UdpIncoming(response.toString(), packet.getAddress(), packet.getPort());
     }
 
     @Override

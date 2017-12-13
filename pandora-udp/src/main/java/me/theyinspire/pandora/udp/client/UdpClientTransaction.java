@@ -28,11 +28,20 @@ public class UdpClientTransaction implements ClientTransaction<UdpProtocol> {
 
     @Override
     public void send(String content) {
-        final DatagramPacket packet = new DatagramPacket(content.getBytes(), content.length(), destination, port);
-        try {
-            socket.send(packet);
-        } catch (IOException e) {
-            throw new IOCommunicationException("Failed to send data", e);
+        final byte[] contentBuffer = content.concat("\0\0\0\0\0").getBytes();
+        int sent = 0;
+        int toSend = 0;
+        final byte[] buffer = new byte[BUFFER_SIZE];
+        while (sent < contentBuffer.length) {
+            toSend = Math.min(contentBuffer.length - sent, BUFFER_SIZE);
+            System.arraycopy(contentBuffer, sent, buffer, 0, toSend);
+            sent += toSend;
+            final DatagramPacket packet = new DatagramPacket(buffer, toSend, destination, port);
+            try {
+                socket.send(packet);
+            } catch (IOException e) {
+                throw new IOCommunicationException("Failed to send datagram packet", e);
+            }
         }
     }
 
