@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.dds.impl;
+package me.theyinspire.pandora.replica.impl;
 
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
@@ -6,7 +6,8 @@ import me.theyinspire.pandora.core.client.UriClientConfigurationReader;
 import me.theyinspire.pandora.core.client.impl.DefaultUriClientConfigurationReader;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
 import me.theyinspire.pandora.core.server.error.ServerException;
-import me.theyinspire.pandora.dds.Replica;
+import me.theyinspire.pandora.replica.Replica;
+import me.theyinspire.pandora.replica.ReplicaRegistryInitializer;
 
 import java.io.IOException;
 import java.net.*;
@@ -28,7 +29,8 @@ public class BeaconReplicaRegistry extends AbstractReplicaRegistry {
     private final int beaconPort;
     private BeaconTransmitter transmitter;
 
-    public BeaconReplicaRegistry(int beaconPort) {
+    public BeaconReplicaRegistry(int beaconPort, final ReplicaRegistryInitializer initializer) {
+        super(initializer);
         this.beaconPort = beaconPort;
         replicaMap = new ConcurrentHashMap<>();
         final UriClientConfigurationReader configurationReader = new DefaultUriClientConfigurationReader();
@@ -37,18 +39,18 @@ public class BeaconReplicaRegistry extends AbstractReplicaRegistry {
     }
 
     @Override
-    protected Set<Replica> getReplicaSet() {
+    public Set<Replica> getReplicaSet() {
         return new HashSet<>(replicaMap.values());
     }
 
     @Override
-    protected void onBeforeDataSync(String signature, String uri, DistributedDataStore dataStore) {
+    protected void onBeforeInit(String signature, String uri) {
         transmitter = new BeaconTransmitter(signature, uri, beaconPort);
         new Thread(transmitter).start();
     }
 
     @Override
-    public void destroy(String signature, String uri, DistributedDataStore dataStore) {
+    public void destroy(String signature) {
         listener.stop();
         transmitter.stop();
     }

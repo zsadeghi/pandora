@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.dds.impl;
+package me.theyinspire.pandora.replica.impl;
 
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
@@ -11,7 +11,8 @@ import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
 import me.theyinspire.pandora.core.datastore.cmd.AllCommand;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
-import me.theyinspire.pandora.dds.Replica;
+import me.theyinspire.pandora.replica.Replica;
+import me.theyinspire.pandora.replica.ReplicaRegistryInitializer;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -29,7 +30,8 @@ public class DataStoreReplicaRegistry extends AbstractReplicaRegistry {
     private final CommandDeserializer deserializer;
     private final UriClientConfigurationReader configurationReader;
 
-    public DataStoreReplicaRegistry(String registryUri) {
+    public DataStoreReplicaRegistry(String registryUri, final ReplicaRegistryInitializer initializer) {
+        super(initializer);
         configurationReader = new DefaultUriClientConfigurationReader();
         final ClientConfiguration clientConfiguration = configurationReader.read(registryUri);
         this.client = DefaultProtocolRegistry.getInstance().getClient(clientConfiguration.getProtocol(), clientConfiguration);
@@ -38,7 +40,7 @@ public class DataStoreReplicaRegistry extends AbstractReplicaRegistry {
     }
 
     @Override
-    protected Set<Replica> getReplicaSet() {
+    public Set<Replica> getReplicaSet() {
         final AllCommand allCommand = DataStoreCommands.all();
         final String response = client.send(serializer.serializeCommand(allCommand));
         final Map<String, Serializable> nodes = deserializer.deserializeResponse(allCommand, response);
@@ -52,12 +54,12 @@ public class DataStoreReplicaRegistry extends AbstractReplicaRegistry {
     }
 
     @Override
-    protected void onBeforeDataSync(String signature, String uri, DistributedDataStore dataStore) {
+    protected void onBeforeInit(String signature, String uri) {
         client.send(serializer.serializeCommand(DataStoreCommands.store(signature, uri)));
     }
 
     @Override
-    public void destroy(String signature, String uri, DistributedDataStore dataStore) {
+    public void destroy(String signature) {
         // This will remove this node as an available replica once the server has shutdown
         client.send(serializer.serializeCommand(DataStoreCommands.delete(signature)));
     }

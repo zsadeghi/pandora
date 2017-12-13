@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.dds.impl;
+package me.theyinspire.pandora.replica.impl;
 
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
@@ -7,7 +7,7 @@ import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
-import me.theyinspire.pandora.dds.Replica;
+import me.theyinspire.pandora.replica.Replica;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.dds.impl;
+package me.theyinspire.pandora.replica.impl;
 
 import me.theyinspire.pandora.core.client.Client;
 import me.theyinspire.pandora.core.client.ClientConfiguration;
@@ -12,7 +12,8 @@ import me.theyinspire.pandora.core.datastore.cmd.LockingDataStoreCommands;
 import me.theyinspire.pandora.core.datastore.cmd.SignatureCommand;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
 import me.theyinspire.pandora.core.server.error.ServerException;
-import me.theyinspire.pandora.dds.Replica;
+import me.theyinspire.pandora.replica.Replica;
+import me.theyinspire.pandora.replica.ReplicaRegistryInitializer;
 
 import java.io.*;
 import java.util.HashSet;
@@ -31,7 +32,8 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
     private final CommandDeserializer deserializer;
     private final ConfigurationFileReader fileReader;
 
-    public ConfigurationFileReplicaRegistry(File file, int refreshRate) {
+    public ConfigurationFileReplicaRegistry(File file, int refreshRate, final ReplicaRegistryInitializer initializer) {
+        super(initializer);
         serializer = AggregateCommandSerializer.getInstance();
         deserializer = AggregateCommandDeserializer.getInstance();
         clients = new CopyOnWriteArraySet<>();
@@ -43,7 +45,7 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
     }
 
     @Override
-    protected Set<Replica> getReplicaSet() {
+    public Set<Replica> getReplicaSet() {
         final SignatureCommand signatureCommand = LockingDataStoreCommands.signature();
         final Set<Replica> replicaSet = new HashSet<>();
         for (Client client : clients) {
@@ -61,7 +63,7 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
     }
 
     @Override
-    public void destroy(String signature, String uri, DistributedDataStore dataStore) {
+    public void destroy(String signature) {
         fileReader.stop();
     }
 

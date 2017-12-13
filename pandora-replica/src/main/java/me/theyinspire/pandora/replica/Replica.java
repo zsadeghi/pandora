@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.dds;
+package me.theyinspire.pandora.replica;
 
 import me.theyinspire.pandora.core.cmd.Command;
 

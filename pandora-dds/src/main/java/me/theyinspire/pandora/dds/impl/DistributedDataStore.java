@@ -7,8 +7,8 @@ import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.datastore.cmd.LockingDataStoreCommands;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.error.ServerException;
-import me.theyinspire.pandora.dds.Replica;
-import me.theyinspire.pandora.dds.ReplicaRegistry;
+import me.theyinspire.pandora.replica.Replica;
+import me.theyinspire.pandora.replica.ReplicaRegistry;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -97,7 +97,7 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
         }
         // first, lock all replicas, and note which ones will need to remain unlocked
         final Map<String, String> locks = new HashMap<>();
-        final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(this);
+        final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(getSignature());
         try {
             for (Replica replica : replicaSet) {
                 locks.put(replica.getSignature(), replica.send(LockingDataStoreCommands.lock(key)));
@@ -142,7 +142,7 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
             return false;
         }
         final String localLock = lock(key);
-        final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(this);
+        final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(getSignature());
         final Map<String, String> locks = new HashMap<>();
         try {
             for (Replica replica : replicaSet) {
@@ -199,12 +199,12 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
 
     @Override
     public void destroy(ServerConfiguration serverConfiguration) {
-        replicaRegistry.destroy(getSignature(), getUri(serverConfiguration), this);
+        replicaRegistry.destroy(getSignature());
     }
 
     @Override
     public void init(ServerConfiguration serverConfiguration, DataStoreConfiguration dataStoreConfiguration) {
-        replicaRegistry.init(getSignature(), getUri(serverConfiguration), this);
+        replicaRegistry.init(getSignature(), getUri(serverConfiguration));
     }
 
 }

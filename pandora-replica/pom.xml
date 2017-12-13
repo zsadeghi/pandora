@@ -10,17 +10,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>pandora-dds</artifactId>
+    <artifactId>pandora-replica</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>pandora-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>pandora-replica</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
