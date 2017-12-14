@@ -2,11 +2,14 @@ package me.theyinspire.pandora.raft.impl;
 
 import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.datastore.*;
+import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
+import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.raft.LogEntry;
 import me.theyinspire.pandora.raft.LogReference;
 import me.theyinspire.pandora.raft.ServerMode;
 import me.theyinspire.pandora.raft.cmd.*;
+import me.theyinspire.pandora.raft.cmd.impl.ImmutableLogEntry;
 import me.theyinspire.pandora.raft.cmd.impl.ImmutableLogReference;
 import me.theyinspire.pandora.raft.cmd.impl.RaftCommands;
 import me.theyinspire.pandora.replica.Replica;
@@ -32,6 +35,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
     private final Random random;
     private final HeartbeatTransmitter heartbeatTransmitter;
     private final ElectionWatcher electionWatcher;
+    private final LogCommitter logCommitter;
     private List<LogEntry> entries;
     private int term;
     private String votedFor;
@@ -61,6 +65,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
         timeout = HALFLIFE + random.nextInt(HALFLIFE);
         heartbeatTransmitter = new HeartbeatTransmitter(this);
         electionWatcher = new ElectionWatcher(this);
+        logCommitter = new LogCommitter(this);
     }
 
     @Override
@@ -118,19 +123,50 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
         return delegate.isEmpty();
     }
 
+    private void waitThroughCandidacy() {
+        if (mode == ServerMode.CANDIDATE) {
+            LOG.info("Waiting for candidacy to be over");
+            while (mode == ServerMode.CANDIDATE) {
+                waitQuietly(1);
+            }
+        }
+    }
+
+    private boolean handleCommand(Command<Boolean> command) {
+        waitThroughCandidacy();
+        if (mode == ServerMode.FOLLOWER) {
+            LOG.info("This is a follower node. Redirecting request to leader: " + command);
+            if (leader == null) {
+                LOG.info("There is no known leader at this point. Client should retry.");
+                return false;
+            }
+            final Replica leader = replicaRegistry.getReplica(this.leader);
+            return leader.send(command);
+        } else {
+            LOG.info("Appending request to log book: " + command);
+            final int index = entries.size();
+            entries.add(new ImmutableLogEntry(command, term));
+            LOG.info("Waiting for entry to be committed across the state machine ...");
+            while (committed <= index) {
+                waitQuietly(1);
+            }
+            return true;
+        }
+    }
+
     @Override
     public boolean store(final String key, final Serializable value) {
-        return delegate.store(key, value);
+        return handleCommand(DataStoreCommands.store(key, value));
+    }
+
+    @Override
+    public boolean delete(final String key) {
+        return handleCommand(DataStoreCommands.delete(key));
     }
 
     @Override
     public Serializable get(final String key) {
         return delegate.get(key);
-    }
-
-    @Override
-    public boolean delete(final String key) {
-        return delegate.delete(key);
     }
 
     @Override
@@ -237,6 +273,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
 
     @Override
     public void destroy(final ServerConfiguration serverConfiguration) {
+        logCommitter.stop();
         heartbeatTransmitter.stop();
         electionWatcher.stop();
         replicaRegistry.destroy(getSignature());
@@ -248,6 +285,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
         replicaRegistry.init(getSignature(), getUri(serverConfiguration));
         new Thread(electionWatcher).start();
         new Thread(heartbeatTransmitter).start();
+        new Thread(logCommitter).start();
     }
 
     private static void waitQuietly(long timeout) {
@@ -368,6 +406,28 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
                 target.matchIndex.put(replica.getSignature(), head.index());
                 return true;
             }
+        }
+
+    }
+
+    private static class LogCommitter extends AbstractStoppable {
+
+        private final RaftDataStore target;
+        private final DataStoreCommandDispatcher dispatcher;
+
+        private LogCommitter(RaftDataStore target) {
+            this.target = target;
+            dispatcher = new DataStoreCommandDispatcher(target.delegate);
+        }
+
+        @Override
+        protected void iterate() {
+            while (target.committed > target.applied) {
+                final LogEntry entry = target.entries.get(target.applied);
+                dispatcher.dispatch(entry.command());
+                target.applied ++;
+            }
+            waitQuietly(1);
         }
 
     }
