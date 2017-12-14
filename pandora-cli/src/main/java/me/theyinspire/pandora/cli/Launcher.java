@@ -2,7 +2,6 @@ package me.theyinspire.pandora.cli;
 
 import me.theyinspire.pandora.cli.impl.DefaultConfigurationReader;
 import me.theyinspire.pandora.core.client.Client;
-import me.theyinspire.pandora.core.client.error.ClientException;
 import me.theyinspire.pandora.core.config.*;
 import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
 import me.theyinspire.pandora.core.datastore.DataStoreRegistry;
@@ -12,7 +11,6 @@ import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.protocol.ProtocolRegistry;
 import me.theyinspire.pandora.core.protocol.impl.DefaultProtocolRegistry;
 import me.theyinspire.pandora.core.server.Server;
-import me.theyinspire.pandora.core.server.error.ServerException;
 
 import java.util.List;
 import java.util.Scanner;
@@ -24,9 +22,16 @@ import java.util.stream.Collectors;
  */
 public class Launcher {
 
-    public static void main(String[] args) throws Exception {
-        final ProtocolRegistry protocolRegistry = setUpProtocolRegistry();
-        final DataStoreRegistry dataStoreRegistry = setUpDataStoreRegistry();
+    public static void main(String[] args) {
+        final ProtocolRegistry protocolRegistry;
+        final DataStoreRegistry dataStoreRegistry;
+        try {
+            protocolRegistry = setUpProtocolRegistry();
+            dataStoreRegistry = setUpDataStoreRegistry();
+        } catch (ClassNotFoundException e) {
+            printError(e);
+            return;
+        }
         final DefaultConfigurationReader configurationReader = new DefaultConfigurationReader();
         try {
             final ExecutionConfiguration executionConfiguration = configurationReader.read(null, args);
@@ -105,7 +110,7 @@ public class Launcher {
                 System.out.println();
             }
             printUsage(protocolRegistry, dataStoreRegistry);
-        } catch (ClientException | ServerException e) {
+        } catch (Exception e) {
             printError(e);
         }
     }

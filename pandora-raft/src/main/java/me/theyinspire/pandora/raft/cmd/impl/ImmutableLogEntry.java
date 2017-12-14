@@ -27,4 +27,9 @@ public class ImmutableLogEntry implements LogEntry {
         return term;
     }
 
+    @Override
+    public String toString() {
+        return "[" + String.format("%03d", term) + "] " + command;
+    }
+
 }

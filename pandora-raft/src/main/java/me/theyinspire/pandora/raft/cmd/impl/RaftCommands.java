@@ -37,6 +37,10 @@ public final class RaftCommands {
         return new TermRaftCommandImpl();
     }
 
+    public static LogRaftCommand log() {
+        return new LogRaftCommandImpl();
+    }
+
     private static class AppendRaftCommandImpl extends AbstractImmutableRaftCommand implements AppendRaftCommand {
 
         private final int commit;
@@ -87,6 +91,10 @@ public final class RaftCommands {
     }
 
     private static class TermRaftCommandImpl implements TermRaftCommand {
+
+    }
+
+    private static class LogRaftCommandImpl implements LogRaftCommand {
 
     }
 

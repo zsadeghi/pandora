@@ -31,6 +31,8 @@ public class RaftCommandDeserializer implements CommandDeserializer {
                 return RaftCommands.leader();
             } else if ("mode".equals(keyword)) {
                 return RaftCommands.mode();
+            } else if ("log".equals(keyword)) {
+                return RaftCommands.log();
             }
             return null;
         }
