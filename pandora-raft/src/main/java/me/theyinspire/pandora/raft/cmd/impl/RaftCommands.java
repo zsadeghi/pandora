@@ -1,8 +1,8 @@
 package me.theyinspire.pandora.raft.cmd.impl;
 
 import me.theyinspire.pandora.raft.cmd.AppendRaftCommand;
-import me.theyinspire.pandora.raft.cmd.LogEntry;
-import me.theyinspire.pandora.raft.cmd.LogHead;
+import me.theyinspire.pandora.raft.LogEntry;
+import me.theyinspire.pandora.raft.LogReference;
 import me.theyinspire.pandora.raft.cmd.VoteRaftCommand;
 
 import java.util.List;
@@ -17,12 +17,12 @@ public final class RaftCommands {
         throw new UnsupportedOperationException();
     }
 
-    public static AppendRaftCommand append(final int term, final String signature, final LogHead head, final int commit,
+    public static AppendRaftCommand append(final int term, final String signature, final LogReference head, final int commit,
                                            final List<LogEntry> entries) {
         return new AppendRaftCommandImpl(term, signature, head, commit, entries);
     }
 
-    public static VoteRaftCommand vote(final int term, final String signature, final LogHead head) {
+    public static VoteRaftCommand vote(final int term, final String signature, final LogReference head) {
         return new VoteRaftCommandImpl(term, signature, head);
     }
 
@@ -32,9 +32,9 @@ public final class RaftCommands {
         private final List<LogEntry> entries;
 
         private AppendRaftCommandImpl(final int term,
-                                        final String signature,
-                                        final LogHead head, final int commit,
-                                        final List<LogEntry> entries) {
+                                      final String signature,
+                                      final LogReference head, final int commit,
+                                      final List<LogEntry> entries) {
             super(term, signature, head);
             this.commit = commit;
             this.entries = entries;
@@ -55,7 +55,7 @@ public final class RaftCommands {
     private static class VoteRaftCommandImpl extends AbstractImmutableRaftCommand implements VoteRaftCommand {
 
         private VoteRaftCommandImpl(final int term, final String signature,
-                                      final LogHead head) {
+                                      final LogReference head) {
             super(term, signature, head);
         }
 

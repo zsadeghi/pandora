@@ -26,4 +26,9 @@ public class ImmutableRaftResponse implements RaftResponse {
         return term;
     }
 
+    @Override
+    public String toString() {
+        return term + " " + success;
+    }
+
 }

@@ -1,8 +1,9 @@
 package me.theyinspire.pandora.core.datastore.mem;
 
-import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.datastore.CommandReceiver;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
+import me.theyinspire.pandora.core.datastore.cmd.TestCommand;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.server.UriServerConfigurationWriter;
 import me.theyinspire.pandora.core.server.error.ServerException;
@@ -166,21 +167,17 @@ public class InMemoryDataStore implements LockingDataStore, CommandReceiver {
     }
 
     @Override
-    public String receive(final CommandWithArguments command) {
-        if ("test".equals(command.getCommand())) {
-            final int count;
-            if (command.getArguments().size() > 0 && command.getArguments().get(0).matches("\\d+")) {
-                count = Integer.parseInt(command.getArguments().get(0));
-            } else {
-                count = 100;
-            }
+    public <R> R receive(final Command<R> command) {
+        if (command instanceof TestCommand) {
+            final int count = 100;
             final StringBuilder builder = new StringBuilder();
             for (int i = 0; i < count; i++) {
                 builder.append(i + 1)
                        .append(" - all work and no play makes Jack a dull boy")
                        .append("\n");
             }
-            return builder.toString();
+            //noinspection unchecked
+            return (R) builder.toString();
         }
         throw new IllegalArgumentException();
     }

@@ -25,10 +25,6 @@ import java.util.stream.Collectors;
 public class Launcher {
 
     public static void main(String[] args) throws Exception {
-        args = ("server --tcp-port=8082 --ds-raft-discovery=file "
-                + "--ds-raft-replica-file=/Users/milad/Projects/Java/pandora/pandora-dds/src/main/resources/sample"
-                + ".txt --data-store=raft").split(" ");
-//        args = ("interactive --tcp-port=8081").split(" ");
         final ProtocolRegistry protocolRegistry = setUpProtocolRegistry();
         final DataStoreRegistry dataStoreRegistry = setUpDataStoreRegistry();
         final DefaultConfigurationReader configurationReader = new DefaultConfigurationReader();

@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.rmi.export;
 
-import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.datastore.CommandReceiver;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
@@ -186,7 +186,7 @@ public class RmiDataStoreWrapper implements LockingDataStore, CommandReceiver {
     }
 
     @Override
-    public String receive(final CommandWithArguments command) {
+    public <R> R receive(final Command<R> command) {
         try {
             return delegate.receive(command);
         } catch (RemoteException e) {

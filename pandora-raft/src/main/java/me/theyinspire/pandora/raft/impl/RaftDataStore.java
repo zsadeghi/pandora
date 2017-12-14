@@ -1,17 +1,8 @@
 package me.theyinspire.pandora.raft.impl;
 
-import me.theyinspire.pandora.core.cmd.CommandWithArguments;
-import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
+import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.datastore.*;
-import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
-import me.theyinspire.pandora.core.datastore.cmd.DeleteCommand;
-import me.theyinspire.pandora.core.datastore.cmd.StoreCommand;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
-import me.theyinspire.pandora.raft.cmd.AppendRaftCommand;
-import me.theyinspire.pandora.raft.cmd.RaftResponse;
-import me.theyinspire.pandora.raft.cmd.VoteRaftCommand;
-import me.theyinspire.pandora.raft.cmd.impl.RaftCommandDeserializer;
-import me.theyinspire.pandora.raft.cmd.impl.RaftCommandSerializer;
 import me.theyinspire.pandora.replica.ReplicaRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,67 +18,13 @@ import java.util.Set;
 public class RaftDataStore implements LockingDataStore, CommandReceiver, InitializingDataStore, DestroyableDataStore {
 
     private static final Log LOG = LogFactory.getLog("pandora.server.raft");
-    public static final int HALFLIFE = 10000;
+    private static final int HALFLIFE = 10000;
     private final LockingDataStore delegate;
     private final ReplicaRegistry replicaRegistry;
-    private final RaftCommandSerializer serializer;
-    private final RaftCommandDeserializer deserializer;
-
     public RaftDataStore(final LockingDataStore delegate,
                          final ReplicaRegistry replicaRegistry) {
         this.delegate = delegate;
         this.replicaRegistry = replicaRegistry;
-        serializer = new RaftCommandSerializer();
-        deserializer = new RaftCommandDeserializer();
-    }
-
-    @Override
-    public long size() {
-        return delegate.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return delegate.isEmpty();
-    }
-
-    @Override
-    public boolean store(final String key, final Serializable value) {
-        final StoreCommand storeCommand = DataStoreCommands.store(key, value);
-        final String command = AggregateCommandSerializer.getInstance().serializeCommand(storeCommand);
-        return false;
-    }
-
-    @Override
-    public Serializable get(final String key) {
-        return delegate.get(key);
-    }
-
-    @Override
-    public boolean delete(final String key) {
-        final DeleteCommand deleteCommand = DataStoreCommands.delete(key);
-        final String command = AggregateCommandSerializer.getInstance().serializeCommand(deleteCommand);
-        return false;
-    }
-
-    @Override
-    public Set<String> keys() {
-        return delegate.keys();
-    }
-
-    @Override
-    public long truncate() {
-        return delegate.truncate();
-    }
-
-    @Override
-    public boolean has(final String key) {
-        return delegate.has(key);
-    }
-
-    @Override
-    public Map<String, Serializable> all() {
-        return delegate.all();
     }
 
     @Override
@@ -135,39 +72,65 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
         return delegate.getSignature();
     }
 
-    public RaftResponse append(AppendRaftCommand command) {
-        return null;
+    @Override
+    public long size() {
+        return delegate.size();
     }
 
-    public RaftResponse vote(VoteRaftCommand command) {
+    @Override
+    public boolean isEmpty() {
+        return delegate.isEmpty();
+    }
+
+    @Override
+    public boolean store(final String key, final Serializable value) {
+        return delegate.store(key, value);
+    }
+
+    @Override
+    public Serializable get(final String key) {
+        return delegate.get(key);
+    }
+
+    @Override
+    public boolean delete(final String key) {
+        return delegate.delete(key);
+    }
+
+    @Override
+    public Set<String> keys() {
+        return delegate.keys();
+    }
+
+    @Override
+    public long truncate() {
+        return delegate.truncate();
+    }
+
+    @Override
+    public boolean has(final String key) {
+        return delegate.has(key);
+    }
+
+    @Override
+    public Map<String, Serializable> all() {
+        return delegate.all();
+    }
+
+    @Override
+    public <R> R receive(final Command<R> command) {
         return null;
     }
 
     @Override
-    public String receive(final CommandWithArguments command) {
-        if (command.getCommand().equals("append")) {
-            final AppendRaftCommand append = (AppendRaftCommand) deserializer.deserializeCommand(
-                    command.toString(), null);
-            final RaftResponse response = append(append);
-            return serializer.serializeResponse(append, response);
-        } else if (command.getCommand().equals("vote")) {
-            final VoteRaftCommand vote = (VoteRaftCommand) deserializer.deserializeCommand(
-                    command.toString(), null);
-            final RaftResponse response = vote(vote);
-            return serializer.serializeResponse(vote, response);
-        }
-        throw new IllegalArgumentException();
+    public void destroy(final ServerConfiguration serverConfiguration) {
+
     }
 
     @Override
     public void init(final ServerConfiguration serverConfiguration,
                      final DataStoreConfiguration dataStoreConfiguration) {
-        replicaRegistry.init(delegate.getSignature(), delegate.getUri(serverConfiguration));
-    }
 
-    @Override
-    public void destroy(final ServerConfiguration serverConfiguration) {
-        replicaRegistry.destroy(getSignature());
     }
 
 }

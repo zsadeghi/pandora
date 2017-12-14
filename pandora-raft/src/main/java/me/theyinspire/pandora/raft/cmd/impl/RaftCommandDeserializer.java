@@ -5,8 +5,9 @@ import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.core.str.impl.DefaultDocumentReader;
-import me.theyinspire.pandora.raft.cmd.LogEntry;
-import me.theyinspire.pandora.raft.cmd.LogHead;
+import me.theyinspire.pandora.raft.LogEntry;
+import me.theyinspire.pandora.raft.LogReference;
+import me.theyinspire.pandora.raft.cmd.RaftCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +24,13 @@ public class RaftCommandDeserializer implements CommandDeserializer {
         final DefaultDocumentReader reader = new DefaultDocumentReader(command);
         final String keyword = reader.read("\\S+", true);
         if (!"vote".equals(keyword) && !"append".equals(keyword)) {
-            throw new IllegalStateException();
+            return null;
         }
         final int term = Integer.parseInt(reader.read("\\S+", true));
         final String signature = reader.read("\\S+", true);
         final int headIndex = Integer.parseInt(reader.read("\\S+", true));
         final int headTerm = Integer.parseInt(reader.read("\\S+", true));
-        final LogHead logHead = new ImmutableLogHead(headIndex, headTerm);
+        final LogReference logHead = new ImmutableLogReference(headIndex, headTerm);
         if ("vote".equals(keyword)) {
             return RaftCommands.vote(term, signature, logHead);
         }
@@ -51,7 +52,10 @@ public class RaftCommandDeserializer implements CommandDeserializer {
 
     @Override
     public <R> R deserializeResponse(final Command<R> command, final String response) {
-        final String[] split = response.trim().split("\\s+");
+        if (!(command instanceof RaftCommand) || !response.matches("\\d+\\s+(true|false)")) {
+            throw new IllegalStateException();
+        }
+        final String[] split = response.split("\\s+");
         //noinspection unchecked
         return (R) new ImmutableRaftResponse(Integer.parseInt(split[0]), Boolean.parseBoolean(split[1]));
     }

@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.core.datastore;
 
-import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.cmd.Command;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -8,6 +8,6 @@ import me.theyinspire.pandora.core.cmd.CommandWithArguments;
  */
 public interface CommandReceiver {
 
-    String receive(CommandWithArguments command);
+    <R> R receive(Command<R> command);
 
 }

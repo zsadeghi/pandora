@@ -48,6 +48,10 @@ public final class DataStoreCommands {
         return new AllCommandImpl();
     }
 
+    public static TestCommand test() {
+        return new TestCommandImpl();
+    }
+
     private static class SizeCommandImpl implements SizeCommand {
 
         @Override
@@ -169,5 +173,14 @@ public final class DataStoreCommands {
         public String toString() {
             return "{all()}";
         }
+    }
+
+    private static class TestCommandImpl implements TestCommand {
+
+        @Override
+        public String toString() {
+            return "{test}";
+        }
+
     }
 }

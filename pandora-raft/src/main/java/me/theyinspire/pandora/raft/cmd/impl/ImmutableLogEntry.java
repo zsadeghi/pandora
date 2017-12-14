@@ -1,7 +1,7 @@
 package me.theyinspire.pandora.raft.cmd.impl;
 
 import me.theyinspire.pandora.core.cmd.Command;
-import me.theyinspire.pandora.raft.cmd.LogEntry;
+import me.theyinspire.pandora.raft.LogEntry;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)

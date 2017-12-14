@@ -1,6 +1,10 @@
 package me.theyinspire.pandora.raft;
 
+import me.theyinspire.pandora.core.cmd.impl.AggregateCommandDeserializer;
+import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
 import me.theyinspire.pandora.core.datastore.impl.DefaultDataStoreRegistry;
+import me.theyinspire.pandora.raft.cmd.impl.RaftCommandDeserializer;
+import me.theyinspire.pandora.raft.cmd.impl.RaftCommandSerializer;
 import me.theyinspire.pandora.raft.impl.RaftDataStoreFactory;
 
 /**
@@ -11,6 +15,8 @@ public class Loader {
 
     static {
         DefaultDataStoreRegistry.getInstance().register(new RaftDataStoreFactory());
+        AggregateCommandDeserializer.getInstance().add(new RaftCommandDeserializer());
+        AggregateCommandSerializer.getInstance().add(new RaftCommandSerializer());
     }
 
 }

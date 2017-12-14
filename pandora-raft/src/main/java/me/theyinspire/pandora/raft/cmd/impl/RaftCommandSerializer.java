@@ -4,7 +4,7 @@ import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
 import me.theyinspire.pandora.raft.cmd.AppendRaftCommand;
-import me.theyinspire.pandora.raft.cmd.LogEntry;
+import me.theyinspire.pandora.raft.LogEntry;
 import me.theyinspire.pandora.raft.cmd.RaftCommand;
 import me.theyinspire.pandora.raft.cmd.RaftResponse;
 

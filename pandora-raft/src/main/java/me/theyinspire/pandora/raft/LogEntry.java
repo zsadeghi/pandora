@@ -1,4 +1,4 @@
-package me.theyinspire.pandora.raft.cmd;
+package me.theyinspire.pandora.raft;
 
 import me.theyinspire.pandora.core.cmd.Command;
 

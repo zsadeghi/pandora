@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.raft.cmd.impl;
 
-import me.theyinspire.pandora.raft.cmd.LogHead;
+import me.theyinspire.pandora.raft.LogReference;
 import me.theyinspire.pandora.raft.cmd.RaftCommand;
 
 /**
@@ -11,14 +11,14 @@ public abstract class AbstractImmutableRaftCommand implements RaftCommand {
 
     private final int term;
     private final String signature;
-    private final LogHead head;
+    private final LogReference head;
 
     protected AbstractImmutableRaftCommand(final int term,
                                            final String signature,
-                                           final LogHead head) {
+                                           final LogReference head) {
         this.term = term;
         this.signature = signature;
-        this.head = new ImmutableLogHead(head);
+        this.head = new ImmutableLogReference(head);
     }
 
     @Override
@@ -32,7 +32,7 @@ public abstract class AbstractImmutableRaftCommand implements RaftCommand {
     }
 
     @Override
-    public LogHead head() {
+    public LogReference head() {
         return head;
     }
 

@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.core.datastore.impl;
 
-import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.datastore.*;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 
@@ -146,7 +146,7 @@ public class SynchronizedDataStore implements LockingDataStore, InitializingData
     }
 
     @Override
-    public synchronized String receive(final CommandWithArguments command) {
+    public synchronized <R> R receive(final Command<R> command) {
         if (delegate instanceof CommandReceiver) {
             CommandReceiver receiver = (CommandReceiver) delegate;
             return receiver.receive(command);

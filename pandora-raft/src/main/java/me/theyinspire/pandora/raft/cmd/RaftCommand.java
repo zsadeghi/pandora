@@ -1,6 +1,7 @@
 package me.theyinspire.pandora.raft.cmd;
 
 import me.theyinspire.pandora.core.cmd.Command;
+import me.theyinspire.pandora.raft.LogReference;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -14,6 +15,6 @@ public interface RaftCommand extends Command<RaftResponse> {
 
     String signature();
 
-    LogHead head();
+    LogReference head();
 
 }

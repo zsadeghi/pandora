@@ -7,7 +7,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.HttpRequest;
 import com.mashape.unirest.request.HttpRequestWithBody;
 import me.theyinspire.pandora.core.client.error.ClientException;
-import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.datastore.CommandReceiver;
 import me.theyinspire.pandora.core.datastore.LockingDataStore;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
@@ -138,9 +138,8 @@ public class DataStoreClient implements LockingDataStore, CommandReceiver {
     }
 
     @Override
-    public String receive(final CommandWithArguments command) {
-        return cleanUpString(
-                execute(String.class, RequestMethod.POST, "/commands/" + command.getCommand(), command.getArguments()));
+    public <R> R receive(final Command<R> command) {
+        return null;//execute(Object.class, RequestMethod.POST, "/commands", command);
     }
 
     private <T> T execute(Class<T> type, RequestMethod method, String path) {

@@ -1,5 +1,7 @@
 package me.theyinspire.pandora.raft.cmd;
 
+import me.theyinspire.pandora.raft.LogEntry;
+
 import java.util.List;
 
 /**

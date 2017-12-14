@@ -1,6 +1,6 @@
 package me.theyinspire.pandora.rmi.export;
 
-import me.theyinspire.pandora.core.cmd.CommandWithArguments;
+import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 
 import java.io.Serializable;
@@ -53,6 +53,6 @@ public interface RmiDataStore extends Remote {
 
     Serializable get(String key, String lock) throws RemoteException;
 
-    String receive(CommandWithArguments command) throws RemoteException;
+    <R> R receive(Command<R> command) throws RemoteException;
 
 }

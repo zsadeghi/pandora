@@ -1,21 +1,26 @@
 package me.theyinspire.pandora.raft.cmd.impl;
 
-import me.theyinspire.pandora.raft.cmd.LogHead;
+import me.theyinspire.pandora.raft.LogEntry;
+import me.theyinspire.pandora.raft.LogReference;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/13/17, 7:35 PM)
  */
-public class ImmutableLogHead implements LogHead {
+public class ImmutableLogReference implements LogReference {
 
     private final int index;
     private final int term;
 
-    public ImmutableLogHead(LogHead head) {
+    public ImmutableLogReference(int index, LogEntry entry) {
+        this(entry.term(), index);
+    }
+
+    public ImmutableLogReference(LogReference head) {
         this(head.index(), head.term());
     }
 
-    public ImmutableLogHead(final int index, final int term) {
+    public ImmutableLogReference(final int index, final int term) {
         this.index = index;
         this.term = term;
     }
