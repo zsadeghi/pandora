@@ -121,7 +121,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
 
     @Override
     public <R> R receive(final Command<R> command) {
-        return null;
+        throw new UnsupportedOperationException("Command not recognized: " + command);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package me.theyinspire.pandora.raft.cmd.impl;
 
-import me.theyinspire.pandora.raft.cmd.AppendRaftCommand;
 import me.theyinspire.pandora.raft.LogEntry;
 import me.theyinspire.pandora.raft.LogReference;
+import me.theyinspire.pandora.raft.cmd.AppendRaftCommand;
 import me.theyinspire.pandora.raft.cmd.VoteRaftCommand;
 
 import java.util.List;
@@ -48,6 +48,12 @@ public final class RaftCommands {
         @Override
         public List<LogEntry> entries() {
             return entries;
+        }
+
+        @Override
+        public String toString() {
+            final String string = super.toString();
+            return string.substring(0, string.length() - 2) + ",entries=" + entries + ")}";
         }
 
     }

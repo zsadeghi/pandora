@@ -36,4 +36,9 @@ public abstract class AbstractImmutableRaftCommand implements RaftCommand {
         return head;
     }
 
+    @Override
+    public String toString() {
+        return "{" + keyword() + "(term=" + term + ",signature=" + signature + ",head=" + head + ")}";
+    }
+
 }
