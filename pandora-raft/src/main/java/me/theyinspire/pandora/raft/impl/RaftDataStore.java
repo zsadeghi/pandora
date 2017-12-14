@@ -126,13 +126,13 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
 
     @Override
     public void destroy(final ServerConfiguration serverConfiguration) {
-
+        replicaRegistry.destroy(getSignature());
     }
 
     @Override
     public void init(final ServerConfiguration serverConfiguration,
                      final DataStoreConfiguration dataStoreConfiguration) {
-
+        replicaRegistry.init(getSignature(), getUri(serverConfiguration));
     }
 
 }
