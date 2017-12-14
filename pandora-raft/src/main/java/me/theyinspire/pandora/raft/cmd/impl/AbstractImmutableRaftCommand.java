@@ -2,12 +2,13 @@ package me.theyinspire.pandora.raft.cmd.impl;
 
 import me.theyinspire.pandora.raft.LogReference;
 import me.theyinspire.pandora.raft.cmd.RaftCommand;
+import me.theyinspire.pandora.raft.cmd.RaftServerCommand;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/13/17, 7:34 PM)
  */
-public abstract class AbstractImmutableRaftCommand implements RaftCommand {
+public abstract class AbstractImmutableRaftCommand implements RaftServerCommand {
 
     private final int term;
     private final String signature;

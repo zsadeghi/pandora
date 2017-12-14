@@ -8,6 +8,7 @@ import me.theyinspire.pandora.core.str.impl.DefaultDocumentReader;
 import me.theyinspire.pandora.raft.LogEntry;
 import me.theyinspire.pandora.raft.LogReference;
 import me.theyinspire.pandora.raft.cmd.RaftCommand;
+import me.theyinspire.pandora.raft.cmd.RaftServerCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,13 @@ public class RaftCommandDeserializer implements CommandDeserializer {
         final DefaultDocumentReader reader = new DefaultDocumentReader(command);
         final String keyword = reader.read("\\S+", true);
         if (!"vote".equals(keyword) && !"append".equals(keyword)) {
+            if ("term".equals(keyword)) {
+                return RaftCommands.term();
+            } else if ("leader".equals(keyword)) {
+                return RaftCommands.leader();
+            } else if ("mode".equals(keyword)) {
+                return RaftCommands.mode();
+            }
             return null;
         }
         final int term = Integer.parseInt(reader.read("\\S+", true));
@@ -52,12 +60,20 @@ public class RaftCommandDeserializer implements CommandDeserializer {
 
     @Override
     public <R> R deserializeResponse(final Command<R> command, final String response) {
-        if (!(command instanceof RaftCommand) || !response.matches("\\d+\\s+(true|false)")) {
+        if (!(command instanceof RaftCommand)) {
             throw new IllegalStateException();
         }
-        final String[] split = response.split("\\s+");
-        //noinspection unchecked
-        return (R) new ImmutableRaftResponse(Integer.parseInt(split[0]), Boolean.parseBoolean(split[1]));
+        if (command instanceof RaftServerCommand) {
+            if (!response.matches("\\d+\\s+(true|false)")) {
+                throw new IllegalStateException();
+            }
+            final String[] split = response.split("\\s+");
+            //noinspection unchecked
+            return (R) new ImmutableRaftResponse(Integer.parseInt(split[0]), Boolean.parseBoolean(split[1]));
+        } else {
+            //noinspection unchecked
+            return (R) response;
+        }
     }
 
 }

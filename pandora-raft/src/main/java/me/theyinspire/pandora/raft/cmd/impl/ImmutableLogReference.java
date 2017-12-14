@@ -35,4 +35,9 @@ public class ImmutableLogReference implements LogReference {
         return term;
     }
 
+    @Override
+    public String toString() {
+        return "{index=" + index + ",term=" + term + "}";
+    }
+
 }

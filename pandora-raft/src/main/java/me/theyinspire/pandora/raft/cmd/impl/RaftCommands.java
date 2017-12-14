@@ -2,8 +2,7 @@ package me.theyinspire.pandora.raft.cmd.impl;
 
 import me.theyinspire.pandora.raft.LogEntry;
 import me.theyinspire.pandora.raft.LogReference;
-import me.theyinspire.pandora.raft.cmd.AppendRaftCommand;
-import me.theyinspire.pandora.raft.cmd.VoteRaftCommand;
+import me.theyinspire.pandora.raft.cmd.*;
 
 import java.util.List;
 
@@ -24,6 +23,18 @@ public final class RaftCommands {
 
     public static VoteRaftCommand vote(final int term, final String signature, final LogReference head) {
         return new VoteRaftCommandImpl(term, signature, head);
+    }
+
+    public static LeaderRaftCommand leader() {
+        return new LeaderRaftCommandImpl();
+    }
+
+    public static ModeRaftCommand mode() {
+        return new ModeRaftCommandImpl();
+    }
+
+    public static TermRaftCommand term() {
+        return new TermRaftCommandImpl();
     }
 
     private static class AppendRaftCommandImpl extends AbstractImmutableRaftCommand implements AppendRaftCommand {
@@ -64,6 +75,18 @@ public final class RaftCommands {
                                       final LogReference head) {
             super(term, signature, head);
         }
+
+    }
+
+    private static class ModeRaftCommandImpl implements ModeRaftCommand {
+
+    }
+
+    private static class LeaderRaftCommandImpl implements LeaderRaftCommand {
+
+    }
+
+    private static class TermRaftCommandImpl implements TermRaftCommand {
 
     }
 

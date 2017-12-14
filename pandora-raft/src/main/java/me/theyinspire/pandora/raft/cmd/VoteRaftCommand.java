@@ -4,7 +4,7 @@ package me.theyinspire.pandora.raft.cmd;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/13/17, 7:33 PM)
  */
-public interface VoteRaftCommand extends RaftCommand {
+public interface VoteRaftCommand extends RaftServerCommand {
 
     @Override
     default String keyword() {
