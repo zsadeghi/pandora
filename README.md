@@ -108,5 +108,8 @@ This application comes with an interactive client to ease communication with the
 
 ## Known Issues
 
-REST client currently cannot send out generic commands to the server, so any such interaction is limited
+- REST client currently cannot send out generic commands to the server, so any such interaction is limited
 to other protocols. These commands include test commands and commands pertaining to the RAFT server.
+
+- If a Raft follower node crashes when using UDP beacon for node discovery, during restart, it might race for
+leadership and override the other nodes' logs. As such, it is not safe to use UDP node discovery at the moment.
