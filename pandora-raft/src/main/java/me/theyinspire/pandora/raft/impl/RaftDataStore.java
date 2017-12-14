@@ -305,7 +305,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
 
     private void updateTimestamp() {
         timestamp.set(System.currentTimeMillis());
-        System.out.println("Updating timestamp: " + timestamp);
+        LOG.info("Updating timestamp: " + timestamp);
     }
 
     private boolean timedOut() {
