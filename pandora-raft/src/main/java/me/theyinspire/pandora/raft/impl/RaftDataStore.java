@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/12/17, 6:20 PM)
  */
-public class RaftDataStore implements LockingDataStore, CommandReceiver, InitializingDataStore, DestroyableDataStore {
+public class RaftDataStore implements LockingDataStore, CommandReceiver, InitializingDataStore, DestroyableDataStore, Synchronized {
 
     private static final Log LOG = LogFactory.getLog("pandora.server.raft");
     private static final int HALFLIFE = 150;
@@ -242,6 +242,10 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
             }
             return (R) builder.toString();
         }
+        if (delegate instanceof CommandReceiver) {
+            CommandReceiver receiver = (CommandReceiver) delegate;
+            return receiver.receive(command);
+        }
         throw new UnsupportedOperationException("Command not recognized: " + command);
     }
 
@@ -320,9 +324,12 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
     public void init(final ServerConfiguration serverConfiguration,
                      final DataStoreConfiguration dataStoreConfiguration) {
         replicaRegistry.init(getSignature(), getUri(serverConfiguration));
-        new Thread(electionWatcher).start();
-        new Thread(heartbeatTransmitter).start();
-        new Thread(logCommitter).start();
+        new Thread(() -> {
+            waitQuietly(500);
+            new Thread(electionWatcher).start();
+            new Thread(heartbeatTransmitter).start();
+            new Thread(logCommitter).start();
+        }).start();
     }
     
     private void sendAppend() {
@@ -454,6 +461,24 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
             if (target.mode == ServerMode.LEADER) {
                 LOG.info("Sending heartbeat signal");
                 target.sendAppend();
+                final Set<Replica> replicaSet = target.replicaRegistry.getReplicaSetFor(target.getSignature());
+                int newCommitted = target.entries.size();
+                while (newCommitted > target.committed) {
+                    if (target.entries.get(newCommitted - 1).term() == target.term) {
+                        int count = 0;
+                        for (Replica replica : replicaSet) {
+                            final String signature = replica.getSignature();
+                            if (target.matchIndex.containsKey(signature) && target.matchIndex.get(signature) >= newCommitted) {
+                                count ++;
+                            }
+                        }
+                        if (count >= replicaSet.size() / 2) {
+                            target.committed = newCommitted;
+                            break;
+                        }
+                    }
+                    newCommitted --;
+                }
             }
             waitQuietly(target.timeout / 2);
         }

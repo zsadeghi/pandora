@@ -2,10 +2,7 @@ package me.theyinspire.pandora.core.datastore.impl;
 
 import me.theyinspire.pandora.core.config.ScopedOptionRegistry;
 import me.theyinspire.pandora.core.config.impl.DefaultOptionRegistry;
-import me.theyinspire.pandora.core.datastore.DataStore;
-import me.theyinspire.pandora.core.datastore.DataStoreConfiguration;
-import me.theyinspire.pandora.core.datastore.DataStoreFactory;
-import me.theyinspire.pandora.core.datastore.DataStoreRegistry;
+import me.theyinspire.pandora.core.datastore.*;
 
 import java.util.*;
 
@@ -44,7 +41,11 @@ public class DefaultDataStoreRegistry implements DataStoreRegistry {
         if (!factories.containsKey(name)) {
             throw new IllegalArgumentException("Unknown data store: " + name);
         }
-        return new SynchronizedDataStore(factories.get(name).getDataStore(configuration));
+        final DataStore dataStore = factories.get(name).getDataStore(configuration);
+        if (dataStore instanceof Synchronized) {
+            return dataStore;
+        }
+        return new SynchronizedDataStore(dataStore);
     }
 
     @Override

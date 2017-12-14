@@ -5,7 +5,10 @@ import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.datastore.cmd.*;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -57,6 +60,8 @@ public class DataStoreCommandSerializer implements CommandSerializer {
             return "xdel " + ((LockedDeleteCommand) command).getKey() + " " + ((LockedDeleteCommand) command).getLock();
         } else if (command instanceof LockedStoreCommand) {
             return "xput " + ((LockedStoreCommand) command).getKey() + " " + ((LockedStoreCommand) command).getLock() + " " + ((LockedStoreCommand) command).getValue();
+        } else if (command instanceof TestCommand) {
+            return "test";
         }
         return null;
     }
@@ -83,6 +88,8 @@ public class DataStoreCommandSerializer implements CommandSerializer {
                 serialized = "error: could not delete the data from the store (" + ((DeleteCommand) command).getKey()
                         + ")";
             }
+        } else if (command instanceof TestCommand) {
+            return (String) response;
         } else if (command instanceof AllCommand) {
             final StringBuilder builder = new StringBuilder();
             //noinspection unchecked

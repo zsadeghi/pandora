@@ -33,6 +33,7 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
     private static final String LOCKED = "locked";
     private static final String SIGNATURE = "signature";
     private static final String URI = "uri";
+    private static final String TEST = "test";
 
     @Override
     public Command<?> deserializeCommand(String command, ServerConfiguration serverConfiguration) {
@@ -78,6 +79,8 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 return LockingDataStoreCommands.delete(readWord(reader), reader.rest().trim().split("\\s+")[0]);
             case XPUT:
                 return LockingDataStoreCommands.store(readWord(reader), readWord(reader), reader.rest().trim());
+            case TEST:
+                return DataStoreCommands.test();
         }
         return null;
     }
@@ -137,6 +140,8 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
             } else {
                 return null;
             }
+        } else if (command instanceof TestCommand) {
+            return (R) response;
         }
         throw new IllegalStateException();
     }
