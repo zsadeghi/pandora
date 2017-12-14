@@ -11,10 +11,17 @@ public interface ReplicaRegistry {
 
     Set<Replica> getReplicaSet();
 
-    default Set<Replica> getReplicaSet(String signature) {
+    default Set<Replica> getReplicaSetFor(String signature) {
         return getReplicaSet().stream()
                               .filter(replica -> !replica.getSignature().equals(signature))
                               .collect(Collectors.toSet());
+    }
+
+    default Replica getReplica(String signature) {
+        return getReplicaSet().stream()
+                .filter(replica -> replica.getSignature().equals(signature))
+                .findFirst()
+                .orElse(null);
     }
 
     default void init(String signature, String uri) {}

@@ -4,7 +4,10 @@ import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.datastore.cmd.impl.DataStoreCommandSerializer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
@@ -22,16 +25,16 @@ public class AggregateCommandSerializer implements CommandSerializer {
     private final Map<Class<? extends Command>, CommandSerializer> serializers;
 
     private AggregateCommandSerializer() {
-        final List<CommandSerializer> serializers = Arrays.asList(
-                new DataStoreCommandSerializer(),
-                new CommandWithArgumentSerializer());
         this.serializers = new HashMap<>();
         accepts = new ArrayList<>();
-        for (CommandSerializer serializer : serializers) {
-            accepts.addAll(serializer.accepts());
-            for (Class<? extends Command> commandType : serializer.accepts()) {
-                this.serializers.put(commandType, serializer);
-            }
+        add(new DataStoreCommandSerializer());
+        add(new CommandWithArgumentSerializer());
+    }
+
+    public void add(CommandSerializer serializer) {
+        accepts.addAll(serializer.accepts());
+        for (Class<? extends Command> commandType : serializer.accepts()) {
+            this.serializers.put(commandType, serializer);
         }
     }
 

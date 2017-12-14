@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author Mohammad Milad Naseri (mmnaseri@programmer.net)
+ * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/12/17, 1:30 PM)
  */
 public class CommandWithArgumentSerializer implements CommandSerializer {

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * @author Mohammad Milad Naseri (mmnaseri@programmer.net)
+ * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/12/17, 1:25 PM)
  */
 public class CommandWithArgumentDeserializer implements CommandDeserializer {

@@ -97,7 +97,7 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
         }
         // first, lock all replicas, and note which ones will need to remain unlocked
         final Map<String, String> locks = new HashMap<>();
-        final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(getSignature());
+        final Set<Replica> replicaSet = replicaRegistry.getReplicaSetFor(getSignature());
         try {
             for (Replica replica : replicaSet) {
                 locks.put(replica.getSignature(), replica.send(LockingDataStoreCommands.lock(key)));
@@ -142,7 +142,7 @@ public class DistributedDataStore implements LockingDataStore, InitializingDataS
             return false;
         }
         final String localLock = lock(key);
-        final Set<Replica> replicaSet = replicaRegistry.getReplicaSet(getSignature());
+        final Set<Replica> replicaSet = replicaRegistry.getReplicaSetFor(getSignature());
         final Map<String, String> locks = new HashMap<>();
         try {
             for (Replica replica : replicaSet) {

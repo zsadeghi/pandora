@@ -146,7 +146,7 @@ public class SynchronizedDataStore implements LockingDataStore, InitializingData
     }
 
     @Override
-    public String receive(final CommandWithArguments command) {
+    public synchronized String receive(final CommandWithArguments command) {
         if (delegate instanceof CommandReceiver) {
             CommandReceiver receiver = (CommandReceiver) delegate;
             return receiver.receive(command);

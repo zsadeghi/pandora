@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author Mohammad Milad Naseri (mmnaseri@programmer.net)
+ * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/12/17, 5:51 PM)
  */
 public class DistributedDataStoreReplicaRegistryInitializer implements ReplicaRegistryInitializer {
@@ -19,7 +19,7 @@ public class DistributedDataStoreReplicaRegistryInitializer implements ReplicaRe
 
     @Override
     public void init(final ReplicaRegistry registry) {
-        final Set<Replica> replicaSet = registry.getReplicaSet(this.dataStore.getSignature());
+        final Set<Replica> replicaSet = registry.getReplicaSetFor(this.dataStore.getSignature());
         for (Replica replica : replicaSet) {
             final Map<String, Serializable> values = replica.send(DataStoreCommands.all());
             for (Map.Entry<String, Serializable> entry : values.entrySet()) {

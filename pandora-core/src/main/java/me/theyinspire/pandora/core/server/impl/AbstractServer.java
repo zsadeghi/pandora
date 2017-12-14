@@ -79,10 +79,11 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
             executor.submit(() -> {
                 String serialized;
                 try {
-                    getLog().info("Executing data store command: " + command);
+                    getLog().info("Executing command: " + command);
                     final Object result = dispatcher.dispatch(command);
                     serialized = serializeResponse(command, result);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     serialized = "error occurred: " + DefaultErrorSerializer.getInstance().serialize(e);
                 }
                 O reply = compose(received, serialized);

@@ -5,7 +5,7 @@ import me.theyinspire.pandora.core.cmd.CommandWithArguments;
 import java.util.List;
 
 /**
- * @author Mohammad Milad Naseri (mmnaseri@programmer.net)
+ * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/12/17, 1:26 PM)
  */
 public class ImmutableCommandWithArguments implements CommandWithArguments {
@@ -26,6 +26,16 @@ public class ImmutableCommandWithArguments implements CommandWithArguments {
     @Override
     public List<String> getArguments() {
         return arguments;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(command).append(" ");
+        for (String argument : arguments) {
+            builder.append(" ").append(argument);
+        }
+        return builder.toString();
     }
 
 }

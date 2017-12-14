@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 public class Launcher {
 
     public static void main(String[] args) throws Exception {
+        args = ("server --tcp-port=8082 --ds-raft-discovery=file "
+                + "--ds-raft-replica-file=/Users/milad/Projects/Java/pandora/pandora-dds/src/main/resources/sample"
+                + ".txt --data-store=raft").split(" ");
+//        args = ("interactive --tcp-port=8081").split(" ");
         final ProtocolRegistry protocolRegistry = setUpProtocolRegistry();
         final DataStoreRegistry dataStoreRegistry = setUpDataStoreRegistry();
         final DefaultConfigurationReader configurationReader = new DefaultConfigurationReader();
@@ -128,6 +132,7 @@ public class Launcher {
     private static DataStoreRegistry setUpDataStoreRegistry() throws ClassNotFoundException {
         Class.forName("me.theyinspire.pandora.core.datastore.mem.Loader");
         Class.forName("me.theyinspire.pandora.dds.Loader");
+        Class.forName("me.theyinspire.pandora.raft.Loader");
         loadPropertyClasses("pandora.stores");
         return DefaultDataStoreRegistry.getInstance();
     }
@@ -219,7 +224,10 @@ public class Launcher {
         }
         System.out.println();
         System.out.println("Data store specific options are:");
+        System.out.println();
         for (String dataStore : dataStoreRegistry.getKnownDataStores()) {
+            System.out.println(dataStore);
+            System.out.println(new String(new char[dataStore.length()]).replace('\0', '='));
             final List<DataStoreOption> options = DefaultOptionRegistry.getInstance().getDataStoreOptions(dataStore);
             printOptions("ds-", dataStore, options);
         }

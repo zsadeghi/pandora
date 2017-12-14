@@ -5,7 +5,7 @@ import me.theyinspire.pandora.core.cmd.CommandDeserializer;
 import me.theyinspire.pandora.core.datastore.cmd.impl.DataStoreCommandDeserializer;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,8 +23,13 @@ public class AggregateCommandDeserializer implements CommandDeserializer {
     private final List<CommandDeserializer> deserializers;
 
     private AggregateCommandDeserializer() {
-        this.deserializers = Arrays.asList(new DataStoreCommandDeserializer(),
-                new CommandWithArgumentDeserializer());
+        this.deserializers = new ArrayList<>();
+        add(new CommandWithArgumentDeserializer());
+        add(new DataStoreCommandDeserializer());
+    }
+
+    public void add(CommandDeserializer deserializer) {
+        this.deserializers.add(0, deserializer);
     }
 
     @Override
