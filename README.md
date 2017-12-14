@@ -105,3 +105,8 @@ default locking method.
 
 This application comes with an interactive client to ease communication with the server. You can simply run the application as
 `/path/to/launcher interactive [options]` to start an interactive session.
+
+## Known Issues
+
+REST client currently cannot send out generic commands to the server, so any such interaction is limited
+to other protocols. These commands include test commands and commands pertaining to the RAFT server.

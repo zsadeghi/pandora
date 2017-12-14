@@ -21,10 +21,12 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
     private static final int HALFLIFE = 10000;
     private final LockingDataStore delegate;
     private final ReplicaRegistry replicaRegistry;
+
     public RaftDataStore(final LockingDataStore delegate,
                          final ReplicaRegistry replicaRegistry) {
         this.delegate = delegate;
         this.replicaRegistry = replicaRegistry;
+        LOG.info("Starting RAFT node: " + delegate.getSignature());
     }
 
     @Override
