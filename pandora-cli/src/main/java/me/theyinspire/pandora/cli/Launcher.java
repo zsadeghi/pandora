@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class Launcher {
 
     public static void main(String[] args) {
-        args = "interactive --tcp-port=8081".split(" ");
         final ProtocolRegistry protocolRegistry;
         final DataStoreRegistry dataStoreRegistry;
         try {
