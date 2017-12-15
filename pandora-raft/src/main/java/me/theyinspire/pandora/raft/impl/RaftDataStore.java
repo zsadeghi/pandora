@@ -429,18 +429,30 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
                     target.votedFor = null;
                     target.leader = null;
                 }
-                int votes = 0;
                 final Set<Replica> replicaSet = target.replicaRegistry.getReplicaSetFor(target.getSignature());
-                for (Replica replica : replicaSet) {
-                    final RaftResponse response = replica.send(RaftCommands.vote(target.term, target.getSignature(), target.getHead()));
-                    if (response.success()) {
-                        votes++;
-                    } else if (response.term() > target.term) {
-                        target.clock.waitQuietly();
-                        return;
-                    }
-                }
-                if (target.mode != ServerMode.CANDIDATE || votes < replicaSet.size() / 2) {
+                final AtomicBoolean preempted = new AtomicBoolean(false);
+                int votes = replicaSet.parallelStream()
+                        .map(replica -> {
+                            if (preempted.get()) {
+                                return null;
+                            } else {
+                                return replica.send(RaftCommands.vote(target.term, target.getSignature(), target.getHead()));
+                            }
+                        })
+                        .map(response -> {
+                            if (response == null) {
+                                return 0;
+                            }
+                            if (response.success()) {
+                                return 1;
+                            } else if (response.term() > target.term) {
+                                preempted.set(true);
+                            }
+                            return 0;
+                        })
+                        .mapToInt(Integer::intValue)
+                        .sum();
+                if (target.mode != ServerMode.CANDIDATE || preempted.get() || votes < replicaSet.size() / 2) {
                     target.clock.waitQuietly();
                     return;
                 }
