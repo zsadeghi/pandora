@@ -41,6 +41,10 @@ public class DataStoreCommandDispatcher {
             return (R) (Boolean) dataStore.has(hasCommand.getKey());
         } else if (command instanceof AllCommand) {
             return (R) dataStore.all();
+        } else if (command instanceof GetUriCommand) {
+            return (R) dataStore.getUri(((GetUriCommand) command).getServerConfiguration());
+        } else if (command instanceof SignatureCommand) {
+            return (R) dataStore.getSignature();
         } else if (command instanceof LockingDataStoreCommand<?> && dataStore instanceof LockingDataStore) {
             if (command instanceof LockCommand) {
                 return (R) ((LockingDataStore) dataStore).lock(((LockCommand) command).getKey());
@@ -58,10 +62,6 @@ public class DataStoreCommandDispatcher {
                 return (R) (Boolean) ((LockingDataStore) dataStore).delete(((LockedDeleteCommand) command).getKey(), ((LockedDeleteCommand) command).getLock());
             } else if (command instanceof LockedGetCommand) {
                 return (R) ((LockingDataStore) dataStore).get(((LockedGetCommand) command).getKey(), ((LockedGetCommand) command).getLock());
-            } else if (command instanceof GetUriCommand) {
-                return (R) ((LockingDataStore) dataStore).getUri(((GetUriCommand) command).getServerConfiguration());
-            } else if (command instanceof SignatureCommand) {
-                return (R) ((LockingDataStore) dataStore).getSignature();
             }
         }
         if (dataStore instanceof CommandReceiver) {

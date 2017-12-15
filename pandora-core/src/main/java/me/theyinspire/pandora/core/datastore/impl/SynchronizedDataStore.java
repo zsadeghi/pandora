@@ -67,10 +67,7 @@ public class SynchronizedDataStore implements LockingDataStore, InitializingData
 
     @Override
     public synchronized String getUri(ServerConfiguration configuration) {
-        if (delegate instanceof LockingDataStore) {
-            return ((LockingDataStore) delegate).getUri(configuration);
-        }
-        return null;
+        return delegate.getUri(configuration);
     }
 
     @Override
@@ -120,10 +117,7 @@ public class SynchronizedDataStore implements LockingDataStore, InitializingData
 
     @Override
     public String getSignature() {
-        if (delegate instanceof LockingDataStore) {
-            return ((LockingDataStore) delegate).getSignature();
-        }
-        return null;
+        return delegate.getSignature();
     }
 
     public DataStore getDelegate() {

@@ -21,16 +21,9 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
     private static final String PUT = "put";
     private static final String GET = "get";
     private static final String DEL = "del";
-    private static final String XPUT = "xput";
-    private static final String XGET = "xget";
-    private static final String XDEL = "xdel";
     private static final String KEYS = "keys";
     private static final String TRUNCATE = "truncate";
     private static final String HAS = "has";
-    private static final String LOCK = "lock";
-    private static final String UNLOCK = "unlock";
-    private static final String RESTORE = "restore";
-    private static final String LOCKED = "locked";
     private static final String SIGNATURE = "signature";
     private static final String URI = "uri";
     private static final String TEST = "test";
@@ -55,14 +48,6 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 return DataStoreCommands.truncate();
             case HAS:
                 return DataStoreCommands.has(reader.rest().trim());
-            case LOCK:
-                return LockingDataStoreCommands.lock(reader.rest().trim());
-            case UNLOCK:
-                return LockingDataStoreCommands.unlock(readWord(reader), reader.rest().trim());
-            case RESTORE:
-                return LockingDataStoreCommands.restore(readWord(reader), reader.rest().trim());
-            case LOCKED:
-                return LockingDataStoreCommands.isLocked(reader.rest().trim());
             case URI:
                 return LockingDataStoreCommands.getUri(serverConfiguration);
             case SIGNATURE:
@@ -73,12 +58,6 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 return DataStoreCommands.delete(reader.rest().trim().split("\\s+")[0]);
             case PUT:
                 return DataStoreCommands.store(readWord(reader), reader.rest().trim());
-            case XGET:
-                return LockingDataStoreCommands.get(readWord(reader), reader.rest().trim());
-            case XDEL:
-                return LockingDataStoreCommands.delete(readWord(reader), reader.rest().trim().split("\\s+")[0]);
-            case XPUT:
-                return LockingDataStoreCommands.store(readWord(reader), readWord(reader), reader.rest().trim());
             case TEST:
                 return DataStoreCommands.test();
         }
@@ -124,23 +103,11 @@ public class DataStoreCommandDeserializer implements CommandDeserializer {
                 }
             }
             return (R) map;
-        } else if (command instanceof LockingDataStoreCommand<?>) {
-            if (command instanceof GetUriCommand) {
-                return (R) response;
-            } else if (command instanceof SignatureCommand) {
-                return (R) response;
-            } else if (command instanceof IsLockedCommand) {
-                return (R) (Boolean) (response.startsWith("locked ") && Boolean.parseBoolean(response.substring(response.lastIndexOf(':') + 2)));
-            } else if (command instanceof LockedStoreCommand) {
-                return (R) (Boolean) response.startsWith("put");
-            } else if (command instanceof LockedDeleteCommand) {
-                return (R) (Boolean) response.startsWith("delete");
-            } else if (command instanceof LockCommand) {
-                return (R) response.substring(response.lastIndexOf(' ') + 1);
-            } else {
-                return null;
-            }
         } else if (command instanceof TestCommand) {
+            return (R) response;
+        } else if (command instanceof GetUriCommand) {
+            return (R) response;
+        } else if (command instanceof SignatureCommand) {
             return (R) response;
         }
         throw new IllegalStateException();

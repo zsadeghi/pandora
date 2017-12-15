@@ -4,6 +4,7 @@ import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.datastore.*;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
+import me.theyinspire.pandora.core.datastore.cmd.LockingDataStoreCommands;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
 import me.theyinspire.pandora.raft.Clock;
 import me.theyinspire.pandora.raft.LogEntry;
@@ -33,11 +34,11 @@ import java.util.function.Supplier;
  * @author Zohreh Sadeghi (zsadeghi@uw.edu)
  * @since 1.0 (12/12/17, 6:20 PM)
  */
-public class RaftDataStore implements LockingDataStore, CommandReceiver, InitializingDataStore, DestroyableDataStore, Synchronized {
+public class RaftDataStore implements DataStore, CommandReceiver, InitializingDataStore, DestroyableDataStore, Synchronized {
 
     private static final Log LOG = LogFactory.getLog("pandora.server.raft");
     private static final int HALF_LIFE = 150;
-    private final LockingDataStore delegate;
+    private final DataStore delegate;
     private final ReplicaRegistry replicaRegistry;
     private final HeartbeatTransmitter heartbeatTransmitter;
     private final ElectionWatcher electionWatcher;
@@ -53,7 +54,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
     private Map<String, Integer> matchIndex;
     private final Clock clock;
 
-    public RaftDataStore(final LockingDataStore delegate,
+    public RaftDataStore(final DataStore delegate,
                          final ReplicaRegistry replicaRegistry) {
         this.delegate = delegate;
         this.replicaRegistry = replicaRegistry;
@@ -88,41 +89,6 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
     @Override
     public String getUri(final ServerConfiguration configuration) {
         return delegate.getUri(configuration);
-    }
-
-    @Override
-    public String lock(final String key) {
-        return delegate.lock(key);
-    }
-
-    @Override
-    public void restore(final String key, final String lock) {
-        delegate.restore(key, lock);
-    }
-
-    @Override
-    public void unlock(final String key, final String lock) {
-        delegate.unlock(key, lock);
-    }
-
-    @Override
-    public boolean store(final String key, final Serializable value, final String lock) {
-        return delegate.store(key, value, lock);
-    }
-
-    @Override
-    public boolean delete(final String key, final String lock) {
-        return delegate.delete(key, lock);
-    }
-
-    @Override
-    public Serializable get(final String key, final String lock) {
-        return delegate.get(key, lock);
-    }
-
-    @Override
-    public boolean locked(final String key) {
-        return delegate.locked(key);
     }
 
     @Override
@@ -225,7 +191,16 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
         } else if (command instanceof TermRaftCommand) {
             return (R) String.valueOf(term);
         } else if (command instanceof LeaderRaftCommand) {
-            return (R) String.valueOf(leader);
+            if (leader == null) {
+                return (R) "(this is the leader node)";
+            } else {
+                final Replica replica = replicaRegistry.getReplica(leader);
+                final StringBuilder builder = new StringBuilder(leader);
+                builder.append(": ");
+                final String uri = replica.send(LockingDataStoreCommands.getUri(null));
+                builder.append(uri);
+                return (R) builder.toString();
+            }
         } else if (command instanceof LogRaftCommand) {
             final StringBuilder builder = new StringBuilder();
             for (int i = 0; i < entries.size(); i++) {

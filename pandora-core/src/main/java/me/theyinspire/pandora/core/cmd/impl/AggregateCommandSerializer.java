@@ -3,6 +3,7 @@ package me.theyinspire.pandora.core.cmd.impl;
 import me.theyinspire.pandora.core.cmd.Command;
 import me.theyinspire.pandora.core.cmd.CommandSerializer;
 import me.theyinspire.pandora.core.datastore.cmd.impl.DataStoreCommandSerializer;
+import me.theyinspire.pandora.core.datastore.cmd.impl.LockingDataStoreCommandSerializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class AggregateCommandSerializer implements CommandSerializer {
         this.serializers = new HashMap<>();
         accepts = new ArrayList<>();
         add(new DataStoreCommandSerializer());
+        add(new LockingDataStoreCommandSerializer());
         add(new CommandWithArgumentSerializer());
     }
 

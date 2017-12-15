@@ -8,6 +8,7 @@ import me.theyinspire.pandora.core.cmd.impl.AggregateCommandSerializer;
 import me.theyinspire.pandora.core.cmd.impl.DefaultErrorSerializer;
 import me.theyinspire.pandora.core.datastore.DataStore;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
+import me.theyinspire.pandora.core.datastore.cmd.LockingDataStoreCommands;
 import me.theyinspire.pandora.core.error.CommunicationException;
 import me.theyinspire.pandora.core.protocol.Protocol;
 import me.theyinspire.pandora.core.server.*;
@@ -51,7 +52,7 @@ public abstract class AbstractServer<P extends Protocol, I extends Incoming, O e
         if (running) {
             throw new ServerException("Server already running");
         }
-        getLog().info("Starting server execution loop");
+        getLog().info("Starting server execution loop: " + dispatcher.dispatch(LockingDataStoreCommands.getUri(configuration)));
         final S session = setUp();
         running = true;
         while (running) {

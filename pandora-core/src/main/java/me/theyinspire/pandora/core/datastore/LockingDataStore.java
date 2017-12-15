@@ -10,8 +10,6 @@ import java.io.Serializable;
  */
 public interface LockingDataStore extends DataStore {
 
-    String getUri(ServerConfiguration configuration);
-
     String lock(String key);
 
     void restore(String key, String lock);
@@ -25,7 +23,5 @@ public interface LockingDataStore extends DataStore {
     Serializable get(String key, String lock);
 
     boolean locked(String key);
-
-    String getSignature();
 
 }

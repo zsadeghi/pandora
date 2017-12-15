@@ -1,5 +1,7 @@
 package me.theyinspire.pandora.core.datastore;
 
+import me.theyinspire.pandora.core.server.ServerConfiguration;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +11,10 @@ import java.util.Set;
  * @since 1.0 (10/26/17, 6:09 PM)
  */
 public interface DataStore {
+
+    String getUri(ServerConfiguration configuration);
+
+    String getSignature();
 
     long size();
 

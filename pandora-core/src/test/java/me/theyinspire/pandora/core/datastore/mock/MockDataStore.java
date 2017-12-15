@@ -2,6 +2,7 @@ package me.theyinspire.pandora.core.datastore.mock;
 
 
 import me.theyinspire.pandora.core.datastore.DataStore;
+import me.theyinspire.pandora.core.server.ServerConfiguration;
 
 import java.io.Serializable;
 import java.util.*;
@@ -18,6 +19,16 @@ public class MockDataStore implements DataStore {
     public MockDataStore() {
         operations = new ArrayList<>();
         arguments = new ArrayList<>();
+    }
+
+    @Override
+    public String getUri(ServerConfiguration configuration) {
+        return null;
+    }
+
+    @Override
+    public String getSignature() {
+        return null;
     }
 
     @Override
