@@ -475,6 +475,8 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
             if (target.mode == ServerMode.LEADER) {
                 LOG.info("Sending heartbeat signal");
                 target.sendAppend();
+                // We now enforce the requirement that if commit index has advanced due to majority voting, we should
+                // advance, too. (Sections 5.3 and 5.4 of the Raft paper).
                 final Set<Replica> replicaSet = target.replicaRegistry.getReplicaSetFor(target.getSignature());
                 int newCommitted = target.entries.size();
                 while (newCommitted > target.committed) {
