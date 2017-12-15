@@ -8,10 +8,3 @@ java -jar GenericNode.jar ts 1237 &
 
 wait
 
-#UDP Server
-#java -jar GenericNode.jar us 1234
-
-#RMI Server
-#rmiregistry -J-Djava.rmi.server.useCodebaseOnly=false &
-#java -Djava.rmi.server.codebase=file:GenericNode.jar -jar GenericNode.jar rmis
-

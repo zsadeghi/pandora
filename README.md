@@ -113,3 +113,24 @@ to other protocols. These commands include test commands and commands pertaining
 
 - If a Raft follower node crashes when using UDP beacon for node discovery, during restart, it might race for
 leadership and override the other nodes' logs. As such, it is not safe to use UDP node discovery at the moment.
+
+- If the file-discovery mode is chosen for the Raft data-store, the I/O operation might race with the election.
+As such, the data-store may override your timeout to avoid such a scenario.
+
+## Raft Data Store
+
+The Raft data store starts up like the regular distributed data store, accepting all the same set of command-line
+configuration options.
+
+This means you can start it with either beacon discovery, registery discovery, or file-based discovery.
+
+Once started, the swarm will inter-communicate via the known address of each of the other members, recovering
+from crashes as discussed in the Raft paper.
+
+### Features
+
+- Heartbeats are sent in parallel. This is achieved via the `sendAppend` method of the `RaftDataStore` class.
+- The leader sends out append requests after each command, as well as during heartbeats. This means that logs
+are rapidly replicated. The halflife of the timeout is initially 150ms, which means that the timeout period might
+be anywhere from 150ms to 300ms. Also, heartbeats are sent out every tenth of a timeout, to avoid unnecessary
+election attempts when the network is slow.

@@ -14,6 +14,7 @@ public class KissCliLauncher {
     private static final Map<String, String> protocols = new HashMap<>();
 
     static {
+        protocols.put("n", "registry");
         protocols.put("t", "tcp");
         protocols.put("u", "udp");
         protocols.put("r", "rest");
@@ -22,7 +23,7 @@ public class KissCliLauncher {
         protocols.put("all", "all");
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         if (args.length == 0) {
             printUsage();
             return;
@@ -33,6 +34,9 @@ public class KissCliLauncher {
         if (mode == 's') {
             // server mode
             actualArgs = getServerArgs(protocol, args);
+        } else if (mode == 'r') {
+            // server mode
+            actualArgs = getRegistryArgs(protocol, args);
         } else if (mode == 'c') {
             // client mode
             actualArgs = getClientArgs(protocol, args);
@@ -70,9 +74,9 @@ public class KissCliLauncher {
         if (protocol.equals("tcp/udp")) {
             return new String[]{
                     "server",
-                    "--data-store=dds",
-                    "--ds-dds-discovery=beacon",
-                    "--ds-memory-locking=optimistic",
+                    "--data-store=raft",
+                    "--ds-raft-discovery=registry",
+                    "--ds-raft-registry-uri=" + args[2],
                     "--protocols=tcp,udp",
                     "--tcp-port=" + args[1],
                     "--udp-port=" + args[2]
@@ -81,9 +85,9 @@ public class KissCliLauncher {
         if (protocol.equals("all")) {
             return new String[]{
                     "server",
-                    "--data-store=dds",
-                    "--ds-dds-discovery=beacon",
-                    "--ds-memory-locking=optimistic",
+                    "--data-store=raft",
+                    "--ds-raft-discovery=registry",
+                    "--ds-raft-registry-uri=" + args[2],
                     "--protocols=tcp,udp,rmi",
                     "--tcp-port=" + args[1],
                     "--udp-port=" + args[2]
@@ -91,11 +95,38 @@ public class KissCliLauncher {
         }
         return new String[]{
                 "server",
-                "--data-store=dds",
-                "--ds-dds-discovery=beacon",
-                "--ds-memory-locking=optimistic",
+                "--data-store=raft",
+                "--ds-raft-discovery=registry",
+                "--ds-raft-registry-uri=" + (protocol.equals("rmi") ? args[1] : args[2]),
                 "--protocols=" + protocol,
-                "--" + protocol + "-port=" + (protocol.equals("rmi") ? "9090" : args[1])
+                "--" + protocol + "-port=" + (protocol.equals("rmi") ? "9090" : args[1]),
+        };
+    }
+
+    private static String[] getRegistryArgs(final String protocol, String[] args) {
+        if (protocol.equals("tcp/udp")) {
+            return new String[]{
+                    "server",
+                    "--data-store=memory",
+                    "--protocols=tcp,udp",
+                    "--tcp-port=" + args[1],
+                    "--udp-port=" + args[2]
+            };
+        }
+        if (protocol.equals("all")) {
+            return new String[]{
+                    "server",
+                    "--data-store=memory",
+                    "--protocols=tcp,udp,rmi",
+                    "--tcp-port=" + args[1],
+                    "--udp-port=" + args[2]
+            };
+        }
+        return new String[]{
+                "server",
+                "--data-store=memory",
+                "--protocols=" + protocol,
+                "--" + protocol + "-port=" + (protocol.equals("rmi") ? "9090" : args[1]),
         };
     }
 
@@ -137,22 +168,29 @@ public class KissCliLauncher {
         System.out.println("\t  * store");
         System.out.println("\t    which will return all items stored in the data store as `key:<key>:value:<value>:`");
         System.out.println("");
-        System.out.println("Server mode:");
+        System.out.println("Raft Server mode:");
         System.out.println("");
         System.out.println("You can start the application in following server modes:");
         System.out.println("");
         System.out.println("* TCP server:");
-        System.out.println("\t /path/to/launcher ts <tcp-port>");
+        System.out.println("\t /path/to/launcher ts <tcp-port> <registry-uri>");
         System.out.println("* UDP server:");
-        System.out.println("\t /path/to/launcher us <udp-port>");
+        System.out.println("\t /path/to/launcher us <udp-port> <registry-uri>");
         System.out.println("* TCP+UDP server:");
-        System.out.println("\t /path/to/launcher tus <tcp-port> <udp-port>");
+        System.out.println("\t /path/to/launcher tus <tcp-port> <udp-port> <registry-uri>");
         System.out.println("* RMI server:");
-        System.out.println("\t /path/to/launcher rmis");
+        System.out.println("\t /path/to/launcher rmis <registry-uri>");
         System.out.println("* TCP+UDP+RMI server:");
-        System.out.println("\t /path/to/launcher alls <tcp-port> <udp-port>");
+        System.out.println("\t /path/to/launcher alls <tcp-port> <udp-port> <registry-uri>");
         System.out.println("* REST server:");
-        System.out.println("\t /path/to/launcher rs <rest-port>");
+        System.out.println("\t /path/to/launcher rs <rest-port> <registry-uri>");
+        System.out.println("* Registry server:");
+        System.out.println("\t /path/to/launcher tr <tcp-port>");
+        System.out.println("\t /path/to/launcher ur <udp-port>");
+        System.out.println("\t /path/to/launcher tur <tcp-port> <udp-port>");
+        System.out.println("\t /path/to/launcher rmir");
+        System.out.println("\t /path/to/launcher allr <tcp-port> <udp-port>");
+        System.out.println("\t /path/to/launcher rr <rest-port>");
     }
 
 }

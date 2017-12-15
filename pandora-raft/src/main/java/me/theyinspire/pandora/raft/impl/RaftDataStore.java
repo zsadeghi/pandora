@@ -486,6 +486,7 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
         protected void iterate() {
             while (target.committed > target.applied) {
                 final LogEntry entry = target.entries.get(target.applied);
+                LOG.info("Committing " + entry + " ...");
                 dispatcher.dispatch(entry.command());
                 target.applied ++;
             }
