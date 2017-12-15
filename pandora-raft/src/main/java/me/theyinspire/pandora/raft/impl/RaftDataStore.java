@@ -67,11 +67,16 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
         heartbeatTransmitter = new HeartbeatTransmitter(this);
         electionWatcher = new ElectionWatcher(this);
         logCommitter = new LogCommitter(this);
+        // Measure how much latency the replica lookup introduces. This can be an issue when using file discovery mode,
+        // as that registry will verify the existence of each designated node every time, thus introducing a meaningful
+        // latency, which must override the timeout.
         long timeMillis = System.currentTimeMillis();
         replicaRegistry.getReplicaSetFor(delegate.getSignature());
         timeMillis = (System.currentTimeMillis() - timeMillis) * 4;
         final long halfLife = Math.max(HALF_LIFE, timeMillis);
+        // Start a clock
         clock = new SimpleClock(() -> (long) (halfLife + Math.random() * halfLife));
+        // Start the first term in follower mode.
         resetTerm(ServerMode.FOLLOWER, 0);
     }
 
@@ -83,6 +88,7 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
         }
         this.term = term;
         this.mode = mode;
+        // Reset the clock to make sure we won't time out.
         clock.reset();
     }
 
@@ -119,6 +125,14 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
         return handleCommand(command, () -> true);
     }
 
+    /**
+     * This method is used to handle commands that modify the server log. These are `store`, `delete`, and
+     * `truncate`. These will be handled locally if this is the leader or redirected to the leader otherwise.
+     * @param command the command
+     * @param value   the value supplier for the return in case we need to commit this in parallel.
+     * @param <E>     the type of the return value
+     * @return the value returned by the operation.
+     */
     private <E> E handleCommand(Command<E> command, Supplier<E> value) {
         waitThroughCandidacy();
         if (mode == ServerMode.FOLLOWER) {
@@ -133,8 +147,10 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
             LOG.info("Appending request to log book: " + command);
             final int index = entries.size();
             entries.add(new ImmutableLogEntry(command, term));
+            // Send out a replication request in parallel.
             new Thread(new LogReplicator(this)).start();
             LOG.info("Waiting for entry to be committed across the state machine ...");
+            // We should wait for the majority of the nodes to accept these values.
             while (committed <= index) {
                 waitQuietly();
             }
@@ -187,10 +203,13 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
         } else if (command instanceof VoteRaftCommand) {
             return (R) vote(((VoteRaftCommand) command));
         } else if (command instanceof ModeRaftCommand) {
+            // Return the current mode the node is operating in.
             return (R) mode.name();
         } else if (command instanceof TermRaftCommand) {
+            // Return the term number for the server.
             return (R) String.valueOf(term);
         } else if (command instanceof LeaderRaftCommand) {
+            // Let's the client know who the leader is.
             if (leader == null) {
                 return (R) "(this is the leader node)";
             } else {
@@ -202,6 +221,14 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
                 return (R) builder.toString();
             }
         } else if (command instanceof LogRaftCommand) {
+            // Returns everything in the LOG.
+            // The format is as follows:
+            // AC xxx [yyy] <command>
+            // `A` indicates that the command has been applied
+            // `C` indicates that the command has been committed.
+            // xxx is the index number of this log entry
+            // yyy is the term number associated with this entry
+            // <command> is the actual command stored in the log
             final StringBuilder builder = new StringBuilder();
             for (int i = 0; i < entries.size(); i++) {
                 LogEntry entry = entries.get(i);
@@ -223,6 +250,7 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
             }
             return (R) builder.toString();
         }
+        // If the command is not recognized, see if the delegate knows how to handle it.
         if (delegate instanceof CommandReceiver) {
             CommandReceiver receiver = (CommandReceiver) delegate;
             return receiver.receive(command);
@@ -243,7 +271,6 @@ public class RaftDataStore implements DataStore, CommandReceiver, InitializingDa
         }
         votedFor = command.signature();
         resetTerm(ServerMode.FOLLOWER, command.term());
-        updateTimestamp();
         LOG.info("Casting a vote for " + command.signature());
         return RaftResponse.accept(term);
     }
