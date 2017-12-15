@@ -56,7 +56,7 @@ public class ConfigurationFileReplicaRegistry extends AbstractReplicaRegistry {
             } catch (Exception e) {
                 continue;
             }
-            final String signature = (String) deserializer.deserializeResponse(signatureCommand, result);
+            final String signature = deserializer.deserializeResponse(signatureCommand, result);
             replicaSet.add(new ImmutableReplica(signature, client));
         }
         return replicaSet;

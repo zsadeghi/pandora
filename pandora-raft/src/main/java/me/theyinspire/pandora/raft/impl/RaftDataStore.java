@@ -5,6 +5,7 @@ import me.theyinspire.pandora.core.datastore.*;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommandDispatcher;
 import me.theyinspire.pandora.core.datastore.cmd.DataStoreCommands;
 import me.theyinspire.pandora.core.server.ServerConfiguration;
+import me.theyinspire.pandora.raft.Clock;
 import me.theyinspire.pandora.raft.LogEntry;
 import me.theyinspire.pandora.raft.LogReference;
 import me.theyinspire.pandora.raft.ServerMode;
@@ -18,10 +19,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -31,10 +36,9 @@ import java.util.function.Supplier;
 public class RaftDataStore implements LockingDataStore, CommandReceiver, InitializingDataStore, DestroyableDataStore, Synchronized {
 
     private static final Log LOG = LogFactory.getLog("pandora.server.raft");
-    private static final int HALFLIFE = 150;
+    private static final int HALF_LIFE = 150;
     private final LockingDataStore delegate;
     private final ReplicaRegistry replicaRegistry;
-    private final Random random;
     private final HeartbeatTransmitter heartbeatTransmitter;
     private final ElectionWatcher electionWatcher;
     private final LogCommitter logCommitter;
@@ -42,29 +46,31 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
     private int term;
     private String votedFor;
     private ServerMode mode;
-    private AtomicLong timestamp;
     private int applied;
     private int committed;
     private String leader;
-    private long timeout;
     private Map<String, Integer> knownIndex;
     private Map<String, Integer> matchIndex;
+    private final Clock clock;
 
     public RaftDataStore(final LockingDataStore delegate,
                          final ReplicaRegistry replicaRegistry) {
         this.delegate = delegate;
         this.replicaRegistry = replicaRegistry;
-        this.random = new Random();
         LOG.info("Starting RAFT node: " + delegate.getSignature());
         entries = new CopyOnWriteArrayList<>();
         votedFor = null;
-        timestamp = new AtomicLong(0L);
         applied = 0;
         committed = 0;
         leader = null;
         heartbeatTransmitter = new HeartbeatTransmitter(this);
         electionWatcher = new ElectionWatcher(this);
         logCommitter = new LogCommitter(this);
+        long timeMillis = System.currentTimeMillis();
+        replicaRegistry.getReplicaSetFor(delegate.getSignature());
+        timeMillis = (System.currentTimeMillis() - timeMillis) * 4;
+        final long halfLife = Math.max(HALF_LIFE, timeMillis);
+        clock = new SimpleClock(() -> (long) (halfLife + Math.random() * halfLife));
         resetTerm(ServerMode.FOLLOWER, 0);
     }
 
@@ -76,7 +82,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
         }
         this.term = term;
         this.mode = mode;
-        this.timeout = HALFLIFE + random.nextInt(HALFLIFE);
+        clock.reset();
     }
 
     @Override
@@ -138,7 +144,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
         if (mode == ServerMode.CANDIDATE) {
             LOG.info("Waiting for candidacy to be over");
             while (mode == ServerMode.CANDIDATE) {
-                waitQuietly(1);
+                waitQuietly();
             }
         }
     }
@@ -164,7 +170,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
             new Thread(new LogReplicator(this)).start();
             LOG.info("Waiting for entry to be committed across the state machine ...");
             while (committed <= index) {
-                waitQuietly(1);
+                waitQuietly();
             }
             LOG.info("Entry committed: " + command);
             return value.get();
@@ -219,7 +225,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
         } else if (command instanceof TermRaftCommand) {
             return (R) String.valueOf(term);
         } else if (command instanceof LeaderRaftCommand) {
-            return (R) leader;
+            return (R) String.valueOf(leader);
         } else if (command instanceof LogRaftCommand) {
             final StringBuilder builder = new StringBuilder();
             for (int i = 0; i < entries.size(); i++) {
@@ -279,15 +285,18 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
 
     private synchronized RaftResponse append(final AppendRaftCommand command) {
         if (command.term() < term) {
-            LOG.info("Rejecting sendAppend request due to shorter tenure");
+            LOG.info("Rejecting sendAppend request due to shorter tenure (" + command.term() + " vs. " + term + ")");
             return RaftResponse.reject(term);
         }
-        updateTimestamp();
         resetTerm(ServerMode.FOLLOWER, command.term());
         leader = command.signature();
-        if (command.head().index() > 0 && (entries.size() <= command.head().index() || entries.get(command.head().index() - 1).term() != command.head().term())) {
-            LOG.info("Rejecting due to log inconsistencies");
-            return RaftResponse.reject(term);
+        // If head.index == 0, it means the leader doesn't have any records, which we cannot disagree with
+        final int leaderHeadIndex = command.head().index();
+        if (leaderHeadIndex != 0) {
+            if (entries.size() < leaderHeadIndex || entries.get(leaderHeadIndex - 1).term() != command.head().term()) {
+                LOG.info("Rejecting due to log inconsistencies (expected " + leaderHeadIndex + " but was " + entries.size() + ")");
+                return RaftResponse.reject(term);
+            }
         }
         LOG.info("Trimming log to leader size: " + command.head());
         while (command.head().index() < entries.size()) {
@@ -304,12 +313,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
     }
 
     private void updateTimestamp() {
-        timestamp.set(System.currentTimeMillis());
-        LOG.info("Updating timestamp: " + timestamp);
-    }
-
-    private boolean timedOut() {
-        return timestamp.get() + timeout < System.currentTimeMillis();
+        clock.reset();
     }
 
     @Override
@@ -324,12 +328,9 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
     public void init(final ServerConfiguration serverConfiguration,
                      final DataStoreConfiguration dataStoreConfiguration) {
         replicaRegistry.init(getSignature(), getUri(serverConfiguration));
-        new Thread(() -> {
-            waitQuietly(500);
-            new Thread(electionWatcher).start();
-            new Thread(heartbeatTransmitter).start();
-            new Thread(logCommitter).start();
-        }).start();
+        new Thread(electionWatcher).start();
+        new Thread(heartbeatTransmitter).start();
+        new Thread(logCommitter).start();
     }
     
     private void sendAppend() {
@@ -341,19 +342,25 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
             this.committed = entries.size();
             return;
         }
-        int success = 0;
-        boolean committed = false;
-        for (Replica replica : replicaSet) {
-            if (!sendAppend(replica, entries)) {
-                LOG.info("This server was preempted as a leader. Abandoning replication.");
-                return;
-            }
-            success ++;
-            if (success > replicaSet.size() / 2 && !committed) {
-                committed = true;
-                this.committed = entries.size();
-            }
-        }
+        final AtomicBoolean committed = new AtomicBoolean(false);
+        final AtomicBoolean preempted = new AtomicBoolean(false);
+        final AtomicInteger count = new AtomicInteger();
+        replicaSet.parallelStream()
+                .map(replica -> !preempted.get() && sendAppend(replica, entries))
+                .peek(success -> {
+                    if (!preempted.get() && !success) {
+                        LOG.info("This server was preempted as a leader. Abandoning replication.");
+                        preempted.set(true);
+                    }
+                })
+                .forEach(success -> {
+                    if (!preempted.get()) {
+                        if (count.incrementAndGet() > replicaSet.size() / 2 && !committed.get()) {
+                            committed.set(true);
+                            this.committed = entries.size();
+                        }
+                    }
+                });
     }
 
     private boolean sendAppend(Replica replica, List<LogEntry> entries) {
@@ -361,10 +368,15 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
             return false;
         }
         if (!knownIndex.containsKey(replica.getSignature())) {
+            // Assume that the follower has committed everything the leader has. This will be auto-corrected if wrong.
             knownIndex.put(replica.getSignature(), entries.size());
         }
+        if (!matchIndex.containsKey(replica.getSignature())) {
+            // Assume that we don't know the last match index for this replica.
+            matchIndex.put(replica.getSignature(), 0);
+        }
         final Integer index = knownIndex.get(replica.getSignature());
-        final LogReference head = new ImmutableLogReference(index, index > 1 ? entries.get(index - 1).term() : -1);
+        final LogReference head = new ImmutableLogReference(index, index > 0 && !entries.isEmpty() ? entries.get(index - 1).term() : -1);
         final List<LogEntry> list = index == 0 ? entries : entries.subList(index - 1, entries.size());
         final AppendRaftCommand append = RaftCommands.append(term, getSignature(), head, committed, list);
         final RaftResponse response = replica.send(append);
@@ -382,15 +394,15 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
             }
         } else {
             LOG.info(replica.getSignature() + ": Everything is okay. Saving state.");
-            knownIndex.put(replica.getSignature(), head.index() + 1);
+            knownIndex.put(replica.getSignature(), head.index());
             matchIndex.put(replica.getSignature(), head.index());
             return true;
         }
     }
 
-    private static void waitQuietly(long timeout) {
+    private static void waitQuietly() {
         try {
-            Thread.sleep(timeout);
+            Thread.sleep(1);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -406,7 +418,8 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
 
         @Override
         protected void iterate() {
-            if (target.mode != ServerMode.LEADER && target.timedOut()) {
+            target.clock.waitQuietly();
+            if (target.mode != ServerMode.LEADER && target.clock.timedOut()) {
                 LOG.info("Starting an election ...");
                 synchronized (target) {
                     target.resetTerm(ServerMode.CANDIDATE, target.term + 1);
@@ -421,12 +434,12 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
                     if (response.success()) {
                         votes++;
                     } else if (response.term() > target.term) {
-                        waitQuietly(target.timeout);
+                        target.clock.waitQuietly();
                         return;
                     }
                 }
                 if (target.mode != ServerMode.CANDIDATE || votes < replicaSet.size() / 2) {
-                    waitQuietly(target.timeout);
+                    target.clock.waitQuietly();
                     return;
                 }
                 LOG.info("Received enough votes to become the leader: " + votes);
@@ -443,7 +456,6 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
                     }
                 }
             }
-            waitQuietly(target.timeout);
         }
 
     }
@@ -480,7 +492,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
                     newCommitted --;
                 }
             }
-            waitQuietly(target.timeout / 2);
+            target.clock.waitQuietly(0.1);
         }
 
     }
@@ -502,7 +514,7 @@ public class RaftDataStore implements LockingDataStore, CommandReceiver, Initial
                 dispatcher.dispatch(entry.command());
                 target.applied ++;
             }
-            waitQuietly(1);
+            waitQuietly();
         }
 
     }
